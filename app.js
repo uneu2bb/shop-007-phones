@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'shop007_data_v2';
+const STORAGE_KEY = 'shop007_data_v3';
 const DEFAULT_DATA = window.DEFAULT_DATA || { shopName: '007', logo: null, cover: null, categories: [], products: [] };
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
 function loadData() {
@@ -11,6 +11,12 @@ function loadData() {
   }
   if (!data.categories) data.categories = DEFAULT_DATA.categories;
   if (!data.products) data.products = DEFAULT_DATA.products;
+  // Fill missing images from defaults
+  if (DEFAULT_DATA.products) {
+    const imgMap = {};
+    DEFAULT_DATA.products.forEach(p => { if (p.image) imgMap[p.id] = p.image; });
+    data.products.forEach(p => { if (!p.image && imgMap[p.id]) p.image = imgMap[p.id]; });
+  }
   renderSite();
 }
 function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
@@ -73,7 +79,7 @@ function renderProducts(catId) {
   products.forEach(p => {
     const card = document.createElement('div');
     card.className = 'product-card';
-    const imgHtml = p.image ? `<img class="product-img" src="${p.image}" alt="${escapeHtml(p.name)}">` : `<div class="product-img placeholder">📱</div>`;
+    const imgHtml = p.image ? `<img class="product-img" src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<div class="product-img placeholder">📱</div>`;
     card.innerHTML = `<div class="product-img-wrap">${imgHtml}</div><div class="product-body"><div class="product-name">${escapeHtml(p.name)}</div><div class="product-price"><div class="price-usd">$${Number(p.priceUsd).toLocaleString()}</div><div class="price-syp">${Number(p.priceSyp).toLocaleString()} ل.س</div></div></div>`;
     grid.appendChild(card);
   });
