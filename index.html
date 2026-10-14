@@ -1,1 +1,134 @@
-<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>007 | محل الهواتف</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body><header><div class="logo-area"><img id="siteLogo" class="logo-img" src="" alt="Logo" style="display:none;"><div id="logoPlaceholder" class="logo-img" style="display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:var(--accent);">007</div><span class="shop-name" id="shopName">007</span></div><div class="search-wrap"><input type="search" id="searchInput" class="search-input" placeholder="ابحث عن جهاز..." autocomplete="off"><span class="search-icon">🔍</span></div></header><section class="hero"><img id="coverImg" class="cover-img" src="" alt="Cover" style="display:none;"><div id="coverPlaceholder" style="width:100%;height:100%;background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 50%,#1a1500 100%);"></div><div class="hero-overlay"><div class="hero-content"><h1>محل 007 للهواتف</h1><p>أحدث الأجهزة • أفضل الأسعار • خدمة موثوقة</p></div></div></section><main><div class="categories-nav" id="categoriesNav"></div><div id="productsContainer"><div class="empty-state"><div style="font-size:3rem;margin-bottom:1rem;">📱</div><h3>جاري التحميل...</h3></div></div></main><footer><p>© 2026 محل 007 للهواتف — جميع الحقوق محفوظة</p></footer><div class="modal-overlay" id="adminModal"><div class="modal"><div class="modal-header"><h2>لوحة التحكم <span>ADMIN</span></h2><button class="close-btn" id="closeModal">&times;</button></div><div class="modal-body"><div class="admin-tabs"><button class="admin-tab active" data-tab="categories">الأقسام</button><button class="admin-tab" data-tab="products">المنتجات</button><button class="admin-tab" data-tab="settings">الإعدادات</button></div><div class="tab-content active" id="tab-categories"><div class="form-group"><label>اسم القسم الجديد</label><div style="display:flex;gap:10px;"><input type="text" class="form-control" id="newCategoryName" placeholder="مثال: آيفون، سامسونج، شاومي..."><button class="btn btn-primary" id="addCategoryBtn">إضافة</button></div></div><h4 style="margin:1.2rem 0 0.8rem;font-size:1rem;">الأقسام الحالية (اسحب لإعادة الترتيب)</h4><ul class="admin-list" id="categoriesList"></ul></div><div class="tab-content" id="tab-products"><div class="form-group"><label>القسم</label><select class="form-control" id="productCategory"></select></div><div class="form-group"><label>اسم المنتج</label><input type="text" class="form-control" id="productName" placeholder="مثال: iPhone 15 Pro Max 256GB"></div><div class="form-row"><div class="form-group"><label>السعر بالدولار ($)</label><input type="number" class="form-control" id="productPriceUsd" placeholder="0" min="0" step="0.01"></div><div class="form-group"><label>السعر بالليرة السورية</label><input type="number" class="form-control" id="productPriceSyp" placeholder="0" min="0" step="1"></div></div><div class="form-group"><label>صورة المنتج</label><div class="img-upload-area" id="productImgUpload"><p>📷 اضغط لرفع صورة من جهازك</p><input type="file" id="productImgInput" accept="image/*" style="display:none;"></div></div><button class="btn btn-primary" id="addProductBtn" style="width:100%;margin-bottom:1.5rem;">إضافة المنتج</button><h4 style="margin:0.5rem 0 0.8rem;font-size:1rem;">المنتجات الحالية (اسحب لإعادة الترتيب)</h4><ul class="admin-list" id="productsList"></ul></div><div class="tab-content" id="tab-settings"><div class="settings-preview"><div class="preview-box"><img id="previewLogo" src="" alt="Logo"><label>اللوجو الحالي</label></div><div class="preview-box cover"><img id="previewCover" src="" alt="Cover"><label>صورة الغلاف</label></div></div><div class="form-group"><label>تغيير اللوجو</label><div class="img-upload-area" id="logoUpload"><p>🖼️ اضغط لرفع لوجو جديد</p><input type="file" id="logoInput" accept="image/*" style="display:none;"></div></div><div class="form-group"><label>تغيير صورة الغلاف</label><div class="img-upload-area" id="coverUpload"><p>🏞️ اضغط لرفع صورة غلاف جديدة</p><input type="file" id="coverInput" accept="image/*" style="display:none;"></div></div><div class="form-group"><label>اسم المحل</label><input type="text" class="form-control" id="shopNameInput" value="007"></div><button class="btn btn-primary" id="saveSettingsBtn" style="width:100%;">حفظ الإعدادات</button></div></div></div></div><div class="toast" id="toast"></div><script src="data.js"></script><script src="app.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>007 | محل الهواتف</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="logo-area">
+    <img id="siteLogo" class="logo-img" src="" alt="Logo" style="display:none;">
+    <div id="logoPlaceholder" class="logo-img" style="display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:var(--accent);">007</div>
+    <span class="shop-name" id="shopName">007</span>
+  </div>
+  <div class="search-wrap">
+    <input type="search" id="searchInput" class="search-input" placeholder="ابحث عن جهاز..." autocomplete="off">
+    <span class="search-icon">🔍</span>
+  </div>
+  <button class="cart-btn" id="cartBtn" type="button" title="سلة المشتريات">
+    🛒 <span class="cart-count" id="cartCount">0</span>
+  </button>
+</header>
+
+<section class="hero">
+  <img id="coverImg" class="cover-img" src="" alt="Cover" style="display:none;">
+  <div id="coverPlaceholder" style="width:100%;height:100%;background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 50%,#1a1500 100%);"></div>
+  <div class="hero-overlay"></div>
+</section>
+
+<main>
+  <div class="categories-nav" id="categoriesNav"></div>
+  <div id="productsContainer">
+    <div class="empty-state"><div style="font-size:3rem;margin-bottom:1rem;">📱</div><h3>جاري التحميل...</h3></div>
+  </div>
+</main>
+
+<footer id="siteFooter">
+  <div class="social-links" id="socialLinks"></div>
+</footer>
+
+<div class="cart-overlay" id="cartOverlay">
+  <div class="cart-drawer">
+    <div class="cart-header">
+      <h3>🛒 سلة المشتريات</h3>
+      <button class="close-btn" id="closeCart">&times;</button>
+    </div>
+    <div class="cart-body" id="cartBody"></div>
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+      <div class="cart-total">
+        <span>المجموع</span>
+        <div>
+          <div class="price-usd" id="cartTotalUsd">$0</div>
+          <div class="price-syp" id="cartTotalSyp">0 ل.س</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="checkoutBtn" style="width:100%;">إتمام الطلب عبر واتساب</button>
+      <button class="btn btn-secondary" id="clearCartBtn" style="width:100%;margin-top:8px;">تفريغ السلة</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>لوحة التحكم <span>ADMIN</span></h2>
+      <button class="close-btn" id="closeModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="categories">الأقسام</button>
+        <button class="admin-tab" data-tab="products">المنتجات</button>
+        <button class="admin-tab" data-tab="settings">الإعدادات</button>
+      </div>
+      <div class="tab-content active" id="tab-categories">
+        <div class="form-group">
+          <label>اسم القسم الجديد</label>
+          <div style="display:flex;gap:10px;">
+            <input type="text" class="form-control" id="newCategoryName" placeholder="مثال: آيفون">
+            <button class="btn btn-primary" id="addCategoryBtn">إضافة</button>
+          </div>
+        </div>
+        <h4 style="margin:1.2rem 0 0.8rem;font-size:1rem;">الأقسام (إخفاء = لا يظهر في القائمة)</h4>
+        <ul class="admin-list" id="categoriesList"></ul>
+      </div>
+      <div class="tab-content" id="tab-products">
+        <div class="form-group"><label>القسم</label><select class="form-control" id="productCategory"></select></div>
+        <div class="form-group"><label>اسم المنتج</label><input type="text" class="form-control" id="productName"></div>
+        <div class="form-row">
+          <div class="form-group"><label>السعر بالدولار ($)</label><input type="number" class="form-control" id="productPriceUsd" min="0" step="0.01"></div>
+          <div class="form-group"><label>السعر بالليرة</label><input type="number" class="form-control" id="productPriceSyp" min="0" step="1"></div>
+        </div>
+        <div class="form-group">
+          <label>صورة المنتج</label>
+          <div class="img-upload-area" id="productImgUpload"><p>📷 رفع صورة</p><input type="file" id="productImgInput" accept="image/*" style="display:none;"></div>
+        </div>
+        <button class="btn btn-primary" id="addProductBtn" style="width:100%;margin-bottom:1.5rem;">إضافة المنتج</button>
+        <h4 style="margin:0.5rem 0 0.8rem;font-size:1rem;">المنتجات (إخفاء = لا يظهر في المتجر)</h4>
+        <ul class="admin-list" id="productsList"></ul>
+      </div>
+      <div class="tab-content" id="tab-settings">
+        <div class="settings-preview">
+          <div class="preview-box"><img id="previewLogo" src="" alt="Logo"><label>اللوجو</label></div>
+          <div class="preview-box cover"><img id="previewCover" src="" alt="Cover"><label>الغلاف</label></div>
+        </div>
+        <div class="form-group">
+          <label>تغيير اللوجو</label>
+          <div class="img-upload-area" id="logoUpload"><p>🖼️ رفع لوجو</p><input type="file" id="logoInput" accept="image/*" style="display:none;"></div>
+          <button class="btn btn-danger btn-sm" id="deleteLogoBtn" style="margin-top:8px;">حذف اللوجو</button>
+        </div>
+        <div class="form-group">
+          <label>تغيير الغلاف</label>
+          <div class="img-upload-area" id="coverUpload"><p>🏞️ رفع غلاف</p><input type="file" id="coverInput" accept="image/*" style="display:none;"></div>
+          <button class="btn btn-danger btn-sm" id="deleteCoverBtn" style="margin-top:8px;">حذف الغلاف</button>
+        </div>
+        <div class="form-group"><label>اسم المحل</label><input type="text" class="form-control" id="shopNameInput" value="007"></div>
+        <hr style="border-color:#333;margin:1.5rem 0;">
+        <h4 style="margin-bottom:1rem;font-size:1rem;">روابط التواصل (تظهر أسفل الصفحة)</h4>
+        <div class="form-group"><label>رقم واتساب (مع رمز الدولة، مثال: 9639xxxxxxxx)</label><input type="text" class="form-control" id="whatsappInput" placeholder="9639xxxxxxxx"></div>
+        <div class="form-group"><label>رابط فيسبوك</label><input type="url" class="form-control" id="facebookInput" placeholder="https://facebook.com/..."></div>
+        <div class="form-group"><label>رابط إنستغرام</label><input type="url" class="form-control" id="instagramInput" placeholder="https://instagram.com/..."></div>
+        <button class="btn btn-primary" id="saveSettingsBtn" style="width:100%;">حفظ الإعدادات</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
