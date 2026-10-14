@@ -47,3 +47,12 @@
 .cond-opt.on{background:linear-gradient(135deg,#e0b83a,var(--accent));color:#111;border-color:transparent;box-shadow:0 4px 14px rgba(201,162,39,.3)}
 .cond-opt:hover:not(.on){border-color:rgba(201,162,39,.45);color:var(--text)}
 .admin-product-extras{margin-bottom:1rem}
+.budget-toggle-row{width:100%}
+.budget-toggle-btn{display:flex;align-items:center;gap:12px;width:100%;background:linear-gradient(145deg,#1e1c14,#14120e);border:1px solid rgba(201,162,39,.28);color:var(--text-muted);font-family:inherit;font-size:.9rem;font-weight:600;padding:11px 14px;border-radius:14px;cursor:pointer;transition:.25s;text-align:right}
+.budget-toggle-btn:hover{border-color:rgba(201,162,39,.5);color:var(--text)}
+.budget-toggle-btn.on{border-color:rgba(201,162,39,.55);color:var(--text);background:linear-gradient(145deg,#221e12,#18160e)}
+.budget-toggle-switch{width:42px;height:24px;border-radius:999px;background:#2a2a2a;border:1px solid rgba(255,255,255,.1);position:relative;flex-shrink:0;transition:.25s}
+.budget-toggle-btn.on .budget-toggle-switch{background:linear-gradient(135deg,#e0b83a,var(--accent));border-color:transparent}
+.budget-toggle-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .25s}
+.budget-toggle-btn.on .budget-toggle-knob{transform:translateX(18px)}
+.budget-toggle-text{flex:1}
