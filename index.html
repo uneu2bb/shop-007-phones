@@ -7,7 +7,37 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@d610b52fec44696d3846c039817cf753bb7c633b/style.css">
+<style>
+.modal-overlay.edit-layer{z-index:1400 !important}
+.product-card .card-edit-btn{display:none;position:absolute;top:8px;right:8px;z-index:3;background:rgba(201,162,39,.95);color:#111;border:none;border-radius:8px;padding:6px 10px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit}
+.admin-mode .product-card .card-edit-btn{display:block}
+.product-card .card-edit-btn:hover{background:#e0b83a}
+.item-info strong{word-break:break-word;overflow-wrap:anywhere;line-height:1.35}
+.item-actions .btn{white-space:nowrap;flex-shrink:0}
+.admin-item{flex-wrap:wrap}
+.edit-modal.lux-edit{max-width:440px;padding:0;overflow:hidden}
+.edit-modal .modal-header-lux{padding:1.15rem 1.35rem;border-bottom:1px solid rgba(201,162,39,.2);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,rgba(201,162,39,.08),transparent)}
+.edit-modal .modal-header-lux h2{font-size:1.15rem;font-weight:800;background:linear-gradient(135deg,var(--accent-light),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0}
+.edit-body{padding:1.25rem 1.35rem 1.5rem}
+.edit-img-box{position:relative;width:100%;height:160px;border-radius:16px;overflow:hidden;background:linear-gradient(145deg,#1a1810,#12120e);border:1px solid rgba(201,162,39,.25);margin-bottom:1.1rem;display:flex;align-items:center;justify-content:center}
+.edit-img-box img{width:100%;height:100%;object-fit:cover}
+.edit-img-ph{font-size:3rem;opacity:.35}
+.edit-img-actions{position:absolute;bottom:10px;left:10px;right:10px;display:flex;gap:8px;justify-content:center}
+.edit-img-actions .btn-sm{padding:7px 12px;font-size:.8rem;border-radius:10px;font-weight:700;border:none;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px)}
+.btn-upload-img{background:rgba(201,162,39,.92);color:#111}
+.btn-delete-img{background:rgba(239,68,68,.88);color:#fff}
+.edit-body .form-group{margin-bottom:.95rem}
+.edit-body .form-group label{display:block;font-size:.82rem;color:var(--text-muted);margin-bottom:.35rem;font-weight:600}
+.edit-body .lux-input{background:#14140f;border:1px solid rgba(201,162,39,.22);border-radius:12px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:.95rem;width:100%}
+.edit-body .lux-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(201,162,39,.15)}
+.edit-body .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.edit-actions{display:flex;gap:10px;margin-top:1.15rem}
+.edit-actions .btn{flex:1;padding:12px;border-radius:12px;font-weight:700;font-family:inherit;font-size:.95rem;border:none;cursor:pointer}
+.edit-actions .btn-primary{background:linear-gradient(135deg,#e0b83a,var(--accent));color:#111}
+.edit-actions .btn-secondary{background:#222;color:var(--text);border:1px solid var(--border)}
+@media (max-width:600px){.edit-body .form-row{grid-template-columns:1fr}.edit-img-box{height:140px}}
+</style>
 </head>
 <body>
 <header>
@@ -41,53 +71,90 @@
     <input type="password" id="passwordInput" class="form-control lux-input" placeholder="كلمة السر" autocomplete="current-password">
     <p class="pass-error" id="passError" style="display:none;">كلمة السر غير صحيحة</p>
     <div class="pass-actions">
-      <button class="btn btn-primary" id="passwordSubmit">دخول</button>
-      <button class="btn btn-secondary" id="passwordCancel">إلغاء</button>
+      <button class="btn btn-primary" id="passwordSubmit" type="button">دخول</button>
+      <button class="btn btn-secondary" id="passwordCancel" type="button">إلغاء</button>
     </div>
   </div>
 </div>
 <div class="modal-overlay" id="editProductModal">
-  <div class="lux-modal edit-modal">
+  <div class="lux-modal edit-modal lux-edit">
     <div class="lux-glow"></div>
     <div class="modal-header-lux">
       <h2>تعديل المنتج</h2>
-      <button class="close-btn" id="closeEditProduct">&times;</button>
+      <button class="close-btn" id="closeEditProduct" type="button">&times;</button>
     </div>
     <div class="edit-body">
-      <div class="form-group"><label>اسم المنتج</label><input type="text" class="form-control lux-input" id="editProductName"></div>
+      <div class="edit-img-box" id="editImgBox">
+        <img id="editProductPreview" src="" alt="" style="display:none;">
+        <div id="editProductPreviewPh" class="edit-img-ph">📱</div>
+        <div class="edit-img-actions">
+          <button type="button" class="btn-sm btn-upload-img" id="editUploadImgBtn">📷 رفع صورة</button>
+          <button type="button" class="btn-sm btn-delete-img" id="editDeleteImgBtn" style="display:none;">🗑️ حذف</button>
+        </div>
+        <input type="file" id="editProductImgInput" accept="image/*" style="display:none;">
+      </div>
+      <div class="form-group">
+        <label>اسم المنتج</label>
+        <input type="text" class="form-control lux-input" id="editProductName" placeholder="اسم الجهاز">
+      </div>
       <div class="form-row">
-        <div class="form-group"><label>السعر بالدولار ($)</label><input type="number" class="form-control lux-input" id="editProductUsd" min="0" step="0.01"></div>
-        <div class="form-group"><label>السعر بالليرة</label><input type="number" class="form-control lux-input" id="editProductSyp" min="0" step="1"></div>
+        <div class="form-group">
+          <label>السعر بالدولار ($)</label>
+          <input type="number" class="form-control lux-input" id="editProductUsd" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>السعر بالليرة</label>
+          <input type="number" class="form-control lux-input" id="editProductSyp" min="0" step="1">
+        </div>
       </div>
       <div class="edit-actions">
-        <button class="btn btn-primary" id="saveEditProduct">حفظ التعديلات</button>
-        <button class="btn btn-secondary" id="cancelEditProduct">إلغاء</button>
+        <button class="btn btn-primary" id="saveEditProduct" type="button">حفظ التعديلات</button>
+        <button class="btn btn-secondary" id="cancelEditProduct" type="button">إلغاء</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="editCategoryModal">
+  <div class="lux-modal edit-modal lux-edit">
+    <div class="lux-glow"></div>
+    <div class="modal-header-lux">
+      <h2>تعديل القسم</h2>
+      <button class="close-btn" id="closeEditCategory" type="button">&times;</button>
+    </div>
+    <div class="edit-body">
+      <div class="form-group">
+        <label>اسم القسم</label>
+        <input type="text" class="form-control lux-input" id="editCategoryName" placeholder="مثال: آيفون">
+      </div>
+      <div class="edit-actions">
+        <button class="btn btn-primary" id="saveEditCategory" type="button">حفظ</button>
+        <button class="btn btn-secondary" id="cancelEditCategory" type="button">إلغاء</button>
       </div>
     </div>
   </div>
 </div>
 <div class="cart-overlay" id="cartOverlay">
   <div class="cart-drawer">
-    <div class="cart-header"><h3>🛒 سلة المشتريات</h3><button class="close-btn" id="closeCart">&times;</button></div>
+    <div class="cart-header"><h3>🛒 سلة المشتريات</h3><button class="close-btn" id="closeCart" type="button">&times;</button></div>
     <div class="cart-body" id="cartBody"></div>
     <div class="cart-footer" id="cartFooter" style="display:none;">
       <div class="cart-total"><span>المجموع</span><div><div class="price-usd" id="cartTotalUsd">$0</div><div class="price-syp" id="cartTotalSyp">0 ل.س</div></div></div>
-      <button class="btn btn-primary" id="checkoutBtn" style="width:100%;">إتمام الطلب عبر واتساب</button>
-      <button class="btn btn-secondary" id="clearCartBtn" style="width:100%;margin-top:8px;">تفريغ السلة</button>
+      <button class="btn btn-primary" id="checkoutBtn" style="width:100%;" type="button">إتمام الطلب عبر واتساب</button>
+      <button class="btn btn-secondary" id="clearCartBtn" style="width:100%;margin-top:8px;" type="button">تفريغ السلة</button>
     </div>
   </div>
 </div>
 <div class="modal-overlay" id="adminModal">
   <div class="modal">
-    <div class="modal-header"><h2>لوحة التحكم <span>ADMIN</span></h2><button class="close-btn" id="closeModal">&times;</button></div>
+    <div class="modal-header"><h2>لوحة التحكم <span>ADMIN</span></h2><button class="close-btn" id="closeModal" type="button">&times;</button></div>
     <div class="modal-body">
       <div class="admin-tabs">
-        <button class="admin-tab active" data-tab="categories">الأقسام</button>
-        <button class="admin-tab" data-tab="products">المنتجات</button>
-        <button class="admin-tab" data-tab="settings">الإعدادات</button>
+        <button class="admin-tab active" data-tab="categories" type="button">الأقسام</button>
+        <button class="admin-tab" data-tab="products" type="button">المنتجات</button>
+        <button class="admin-tab" data-tab="settings" type="button">الإعدادات</button>
       </div>
       <div class="tab-content active" id="tab-categories">
-        <div class="form-group"><label>اسم القسم الجديد</label><div style="display:flex;gap:10px;"><input type="text" class="form-control" id="newCategoryName" placeholder="مثال: آيفون"><button class="btn btn-primary" id="addCategoryBtn">إضافة</button></div></div>
+        <div class="form-group"><label>اسم القسم الجديد</label><div style="display:flex;gap:10px;"><input type="text" class="form-control" id="newCategoryName" placeholder="مثال: آيفون"><button class="btn btn-primary" id="addCategoryBtn" type="button">إضافة</button></div></div>
         <h4 class="section-title">الأقسام</h4>
         <ul class="admin-list" id="categoriesList"></ul>
       </div>
@@ -99,7 +166,7 @@
           <div class="form-group"><label>السعر بالليرة</label><input type="number" class="form-control" id="productPriceSyp" min="0" step="1"></div>
         </div>
         <div class="form-group"><label>صورة المنتج</label><div class="img-upload-area" id="productImgUpload"><p>📷 رفع صورة</p><input type="file" id="productImgInput" accept="image/*" style="display:none;"></div></div>
-        <button class="btn btn-primary" id="addProductBtn" style="width:100%;margin-bottom:1.5rem;">إضافة المنتج</button>
+        <button class="btn btn-primary" id="addProductBtn" style="width:100%;margin-bottom:1.5rem;" type="button">إضافة المنتج</button>
         <h4 class="section-title">المنتجات</h4>
         <ul class="admin-list" id="productsList"></ul>
       </div>
@@ -108,16 +175,16 @@
           <div class="preview-box"><img id="previewLogo" src="" alt="Logo"><label>اللوجو</label></div>
           <div class="preview-box cover"><img id="previewCover" src="" alt="Cover"><label>الغلاف</label></div>
         </div>
-        <div class="form-group"><label>تغيير اللوجو</label><div class="img-upload-area" id="logoUpload"><p>🖼️ رفع لوجو</p><input type="file" id="logoInput" accept="image/*" style="display:none;"></div><button class="btn btn-danger btn-sm" id="deleteLogoBtn" style="margin-top:8px;">حذف اللوجو</button></div>
-        <div class="form-group"><label>تغيير الغلاف</label><div class="img-upload-area" id="coverUpload"><p>🏞️ رفع غلاف</p><input type="file" id="coverInput" accept="image/*" style="display:none;"></div><button class="btn btn-danger btn-sm" id="deleteCoverBtn" style="margin-top:8px;">حذف الغلاف</button></div>
+        <div class="form-group"><label>تغيير اللوجو</label><div class="img-upload-area" id="logoUpload"><p>🖼️ رفع لوجو</p><input type="file" id="logoInput" accept="image/*" style="display:none;"></div><button class="btn btn-danger btn-sm" id="deleteLogoBtn" style="margin-top:8px;" type="button">حذف اللوجو</button></div>
+        <div class="form-group"><label>تغيير الغلاف</label><div class="img-upload-area" id="coverUpload"><p>🏞️ رفع غلاف</p><input type="file" id="coverInput" accept="image/*" style="display:none;"></div><button class="btn btn-danger btn-sm" id="deleteCoverBtn" style="margin-top:8px;" type="button">حذف الغلاف</button></div>
         <div class="form-group"><label>اسم المحل</label><input type="text" class="form-control" id="shopNameInput" value="007"></div>
         <hr class="divider">
         <h4 class="section-title">كلمة سر لوحة التحكم</h4>
         <div class="form-group"><label>كلمة السر الحالية</label><input type="password" class="form-control" id="currentPassInput" placeholder="اتركها فارغة إن لم تكن موجودة"></div>
         <div class="form-group"><label>كلمة السر الجديدة</label><input type="password" class="form-control" id="newPassInput" placeholder="كلمة سر جديدة"></div>
         <div class="pass-btns">
-          <button class="btn btn-primary btn-sm" id="savePassBtn">حفظ كلمة السر</button>
-          <button class="btn btn-danger btn-sm" id="deletePassBtn">حذف كلمة السر</button>
+          <button class="btn btn-primary btn-sm" id="savePassBtn" type="button">حفظ كلمة السر</button>
+          <button class="btn btn-danger btn-sm" id="deletePassBtn" type="button">حذف كلمة السر</button>
         </div>
         <p class="pass-hint" id="passStatus"></p>
         <hr class="divider">
@@ -125,17 +192,18 @@
         <div class="form-group"><label>رقم واتساب</label><input type="text" class="form-control" id="whatsappInput" placeholder="9639xxxxxxxx"></div>
         <div class="form-group"><label>رابط فيسبوك</label><input type="url" class="form-control" id="facebookInput" placeholder="https://facebook.com/..."></div>
         <div class="form-group"><label>رابط إنستغرام</label><input type="url" class="form-control" id="instagramInput" placeholder="https://instagram.com/..."></div>
-        <button class="btn btn-primary" id="saveSettingsBtn" style="width:100%;">حفظ الإعدادات</button>
+        <button class="btn btn-primary" id="saveSettingsBtn" style="width:100%;" type="button">حفظ الإعدادات</button>
       </div>
     </div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="data.js"></script>
-<script src="v1.js"></script>
-<script src="u1.js"></script>
-<script src="u2.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@d610b52fec44696d3846c039817cf753bb7c633b/config.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@d610b52fec44696d3846c039817cf753bb7c633b/data.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@d610b52fec44696d3846c039817cf753bb7c633b/v1.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@d610b52fec44696d3846c039817cf753bb7c633b/u1.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@d610b52fec44696d3846c039817cf753bb7c633b/u2.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@main/patch.js"></script>
 </body>
 </html>
