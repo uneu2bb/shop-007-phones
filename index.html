@@ -113,8 +113,8 @@
         <div class="form-group"><label>اسم المحل</label><input type="text" class="form-control" id="shopNameInput" value="007"></div>
         <hr class="divider">
         <h4 class="section-title">كلمة سر لوحة التحكم</h4>
-        <div class="form-group"><label>كلمة السر الحالية (إن وُجدت)</label><input type="password" class="form-control" id="currentPassInput" placeholder="اتركها فارغة إن لم تكن موجودة"></div>
-        <div class="form-group"><label>كلمة السر الجديدة</label><input type="password" class="form-control" id="newPassInput" placeholder="اترك فارغة للحذف"></div>
+        <div class="form-group"><label>كلمة السر الحالية</label><input type="password" class="form-control" id="currentPassInput" placeholder="اتركها فارغة إن لم تكن موجودة"></div>
+        <div class="form-group"><label>كلمة السر الجديدة</label><input type="password" class="form-control" id="newPassInput" placeholder="كلمة سر جديدة"></div>
         <div class="pass-btns">
           <button class="btn btn-primary btn-sm" id="savePassBtn">حفظ كلمة السر</button>
           <button class="btn btn-danger btn-sm" id="deletePassBtn">حذف كلمة السر</button>
@@ -122,7 +122,7 @@
         <p class="pass-hint" id="passStatus"></p>
         <hr class="divider">
         <h4 class="section-title">روابط التواصل</h4>
-        <div class="form-group"><label>رقم واتساب (مثال: 9639xxxxxxxx)</label><input type="text" class="form-control" id="whatsappInput" placeholder="9639xxxxxxxx"></div>
+        <div class="form-group"><label>رقم واتساب</label><input type="text" class="form-control" id="whatsappInput" placeholder="9639xxxxxxxx"></div>
         <div class="form-group"><label>رابط فيسبوك</label><input type="url" class="form-control" id="facebookInput" placeholder="https://facebook.com/..."></div>
         <div class="form-group"><label>رابط إنستغرام</label><input type="url" class="form-control" id="instagramInput" placeholder="https://instagram.com/..."></div>
         <button class="btn btn-primary" id="saveSettingsBtn" style="width:100%;">حفظ الإعدادات</button>
@@ -131,7 +131,11 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <script src="data.js"></script>
-<script src="app.js"></script>
+<script src="v1.js"></script>
+<script src="u1.js"></script>
+<script src="u2.js"></script>
 </body>
 </html>
