@@ -17,6 +17,11 @@
   }
 
   window.shopFilters = window.shopFilters || { condition: 'all', maxBudget: null, sort: 'shop' };
+  // Force reset budget so old stuck $100 from previous session is cleared
+  try {
+    shopFilters.maxBudget = null;
+    shopFilters._budgetNeedsReset = true;
+  } catch(e) {}
 
   function maxProductPrice() {
     var max = 0;
@@ -40,8 +45,16 @@
       }
     }
     var maxP = Math.ceil(maxProductPrice());
-    if (shopFilters.maxBudget == null) shopFilters.maxBudget = maxP;
+    if (shopFilters.maxBudget == null || shopFilters._budgetNeedsReset || shopFilters.maxBudget < 50) {
+      shopFilters.maxBudget = maxP;
+      shopFilters._budgetNeedsReset = false;
+    }
     if (shopFilters.maxBudget > maxP) shopFilters.maxBudget = maxP;
+    if (data && data.products && data.products.length && shopFilters.maxBudget < maxP * 0.3) {
+      var match = 0;
+      data.products.forEach(function(p){ if (!p.hidden && p.priceUsd <= shopFilters.maxBudget) match++; });
+      if (match < 3) { shopFilters.maxBudget = maxP; }
+    }
 
     var cond = shopFilters.condition;
     host.innerHTML =
@@ -132,7 +145,7 @@
     buildFiltersBar();
     var products = filteredList();
     if (!products.length) {
-      container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3>لا توجد منتجات ضمن هذه الفلاتر</h3></div>';
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3>لا توجد منتجات ضمن هذه الفلاتر</h3><p style="color:var(--text-muted);font-size:.9rem;margin-top:8px">جرّب رفع الميزانية أو اختيار أي حالة</p></div>';
       return;
     }
     container.innerHTML = '<div class="products-grid modern-grid" id="productsGrid"></div>';
@@ -237,9 +250,15 @@
     };
   }
 
+  var _featuresBooted = false;
   var origRS = window.renderSite;
   window.renderSite = function() {
     if (typeof origRS === 'function') origRS();
+    if (!_featuresBooted && data && data.products && data.products.length) {
+      shopFilters._budgetNeedsReset = true;
+      shopFilters.maxBudget = null;
+      _featuresBooted = true;
+    }
     buildFiltersBar();
     if (typeof renderProducts === 'function') renderProducts();
     hookSave();
@@ -248,6 +267,8 @@
 
   setTimeout(function(){
     try {
+      shopFilters._budgetNeedsReset = true;
+      shopFilters.maxBudget = null;
       buildFiltersBar();
       if (typeof renderProducts === 'function') renderProducts();
       hookSave();
@@ -255,6 +276,11 @@
     } catch(e) { console.warn(e); }
   }, 600);
   setTimeout(function(){
-    try { buildFiltersBar(); renderProducts(); } catch(e){}
+    try {
+      shopFilters._budgetNeedsReset = true;
+      shopFilters.maxBudget = null;
+      buildFiltersBar();
+      renderProducts();
+    } catch(e){}
   }, 2000);
 })();
