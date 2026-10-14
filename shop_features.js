@@ -4,19 +4,30 @@
   try { extras = JSON.parse(localStorage.getItem(EXTRAS_KEY) || '{}') || {}; } catch(e) { extras = {}; }
   function saveExtras() { try { localStorage.setItem(EXTRAS_KEY, JSON.stringify(extras)); } catch(e) {} }
   function getExtra(id) {
+    var p = (window.data && data.products) ? data.products.find(function(x){ return x.id === id; }) : null;
     var e = extras[id] || {};
     return {
-      condition: e.condition || 'new',
-      storage: e.storage || '',
-      battery: e.battery != null ? e.battery : null,
-      ram: e.ram || '',
-      cleanliness: e.cleanliness != null ? e.cleanliness : null,
-      description: e.description || ''
+      condition: (p && p.condition) || e.condition || 'new',
+      storage: (p && p.storage) || e.storage || '',
+      battery: (p && p.battery != null) ? p.battery : (e.battery != null ? e.battery : null),
+      ram: (p && p.ram) || e.ram || '',
+      cleanliness: (p && p.cleanliness != null) ? p.cleanliness : (e.cleanliness != null ? e.cleanliness : null),
+      description: (p && p.description) || e.description || ''
     };
   }
   function setExtra(id, obj) {
-    extras[id] = Object.assign(getExtra(id), obj);
+    var merged = Object.assign(getExtra(id), obj);
+    extras[id] = merged;
     saveExtras();
+    var p = (window.data && data.products) ? data.products.find(function(x){ return x.id === id; }) : null;
+    if (p) {
+      p.condition = merged.condition || 'new';
+      p.storage = merged.storage || '';
+      p.ram = merged.ram || '';
+      p.battery = merged.battery != null && merged.battery !== '' ? Number(merged.battery) : null;
+      p.cleanliness = merged.cleanliness != null && merged.cleanliness !== '' ? Number(merged.cleanliness) : null;
+      p.description = merged.description || '';
+    }
   }
 
   window.shopFilters = window.shopFilters || { condition: 'all', maxBudget: null, sort: 'shop', budgetEnabled: false };
