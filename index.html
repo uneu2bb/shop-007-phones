@@ -40,18 +40,26 @@
 footer{padding:3rem 1rem 2.5rem;margin-top:3.5rem;border-top:1px solid rgba(201,162,39,.15);background:linear-gradient(180deg,transparent,rgba(201,162,39,.03))}
 .social-links{display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap}
 .social-links:empty{display:none}
-.social-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:18px;text-decoration:none;color:#fff;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s;overflow:hidden;border:1px solid rgba(255,255,255,.12)}
-.social-btn .social-icon{position:relative;z-index:2;display:flex;width:26px;height:26px}
+.social-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;text-decoration:none;color:#fff;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s;overflow:hidden;border:1px solid rgba(255,255,255,.12)}
+.social-btn .social-icon{position:relative;z-index:2;display:flex;width:28px;height:28px}
 .social-btn .social-icon svg{width:100%;height:100%;display:block}
-.social-btn .social-ring{position:absolute;inset:0;border-radius:18px;pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.2)}
+.social-btn .social-ring{position:absolute;inset:0;border-radius:16px;pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.2)}
 .social-btn.wa{background:linear-gradient(145deg,#2FE574 0%,#25D366 40%,#128C7E 100%);box-shadow:0 8px 28px rgba(37,211,102,.4),0 2px 6px rgba(0,0,0,.25)}
 .social-btn.fb{background:linear-gradient(145deg,#4B9BFF 0%,#1877F2 45%,#0C5BC0 100%);box-shadow:0 8px 28px rgba(24,119,242,.4),0 2px 6px rgba(0,0,0,.25)}
 .social-btn.ig{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%);box-shadow:0 8px 28px rgba(220,39,67,.42),0 2px 6px rgba(0,0,0,.25)}
 .social-btn:hover{transform:translateY(-6px) scale(1.08)}
-.social-btn.wa:hover{box-shadow:0 14px 36px rgba(37,211,102,.55),0 4px 10px rgba(0,0,0,.3)}
-.social-btn.fb:hover{box-shadow:0 14px 36px rgba(24,119,242,.55),0 4px 10px rgba(0,0,0,.3)}
-.social-btn.ig:hover{box-shadow:0 14px 36px rgba(220,39,67,.55),0 4px 10px rgba(0,0,0,.3)}
-.social-btn:active{transform:translateY(-2px) scale(1.02)}
+.cat-picker-wrap{width:100%;display:flex;justify-content:center;margin-bottom:.25rem}
+.cat-picker-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(145deg,#1e1c14,#14120e);border:1px solid rgba(201,162,39,.35);color:var(--text);font-family:inherit;font-size:1rem;font-weight:700;padding:12px 22px;border-radius:16px;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.35);transition:transform .25s,box-shadow .25s,border-color .25s;min-width:200px;justify-content:center}
+.cat-picker-btn:hover{transform:translateY(-2px);border-color:rgba(201,162,39,.6);box-shadow:0 10px 32px rgba(201,162,39,.18)}
+.cat-picker-label{background:linear-gradient(135deg,var(--accent-light),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cat-picker-chevron{color:var(--accent);font-size:.9rem}
+.cat-picker-modal{max-width:380px;padding:0}
+.cat-picker-grid{padding:1rem 1.15rem 1.35rem;display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto}
+.cat-picker-item{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 16px;border-radius:14px;background:#16140f;border:1px solid rgba(201,162,39,.15);color:var(--text);font-family:inherit;font-size:1rem;font-weight:600;cursor:pointer;transition:background .2s,border-color .2s;text-align:right}
+.cat-picker-item:hover{background:#1e1c14;border-color:rgba(201,162,39,.4)}
+.cat-picker-item.active{background:linear-gradient(135deg,rgba(201,162,39,.18),rgba(201,162,39,.08));border-color:var(--accent)}
+.cat-item-check{color:var(--accent);font-weight:800}
+.categories-nav .cat-btn{display:none !important}
 </style>
 </head>
 <body>
@@ -220,6 +228,6 @@ footer{padding:3rem 1rem 2.5rem;margin-top:3.5rem;border-top:1px solid rgba(201,
 <script src="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@d610b52fec44696d3846c039817cf753bb7c633b/u1.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@d610b52fec44696d3846c039817cf753bb7c633b/u2.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@9e15901d93573998dc3cdeb49d8d3e37522e4356/patch.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@8b001b58d7047cc88c3e3f22aa62f62dabcfe594/social_patch.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/uneu2bb/shop-007-phones@74cf005bbe654ff1c573b3f059e76797b5b485b6/ui_patch.js"></script>
 </body>
 </html>
