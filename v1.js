@@ -1,35 +1,50 @@
-const SUPABASE_URL = (typeof window !== 'undefined' && window.SUPABASE_URL) || '';
-const SUPABASE_ANON_KEY = (typeof window !== 'undefined' && window.SUPABASE_ANON_KEY) || '';
+const SUPABASE_URL = window.SUPABASE_URL;
+const SUPABASE_KEY = window.SUPABASE_ANON_KEY;
+const DEFAULT_DATA = window.DEFAULT_DATA || { shopName: '007', logo: null, cover: null, whatsapp: '', facebook: '', instagram: '', categories: [], products: [] };
 const { createClient } = supabase;
-let sb = null;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let data = { shopName: '007', logo: null, cover: null, whatsapp: '', facebook: '', instagram: '', adminPassword: '', categories: [], products: [] };
+let cart = [];
+let currentCatId = 'all';
+let searchQuery = '';
+let editingProductId = null;
+let adminUnlocked = false;
+let frontDragId = null;
 let cloudReady = false;
 
-function initSupabase() {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return false;
-  try {
-    sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    return true;
-  } catch (e) {
-    console.error(e);
-    return false;
-  }
-}
+const CART_KEY = 'shop007_cart_v1';
 
+function loadCart() {
+  try { const s = localStorage.getItem(CART_KEY); if (s) cart = JSON.parse(s) || []; } catch (e) { cart = []; }
+}
+function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); updateCartUI(); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
 function showSetupBanner(msg) {
-  let ban = document.getElementById('setupBanner');
-  if (!ban) {
-    ban = document.createElement('div');
-    ban.id = 'setupBanner';
-    ban.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#7f1d1d;color:#fff;padding:10px 14px;font-size:.85rem;text-align:center';
-    document.body.prepend(ban);
+  let el = document.getElementById('setupBanner');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'setupBanner';
+    el.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#7f1d1d;color:#fff;padding:12px 16px;text-align:center;font-size:0.9rem;';
+    document.body.prepend(el);
   }
-  ban.textContent = msg;
+  el.innerHTML = msg;
 }
 
 async function uploadImage(file, folder) {
-  if (!sb) throw new Error('Supabase not ready');
-  const ext = (file.name && file.name.split('.').pop()) || 'jpg';
-  const path = folder + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const path = folder + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
   const { error } = await sb.storage.from('shop-images').upload(path, file, { upsert: true, contentType: file.type || 'image/jpeg' });
   if (error) throw error;
   const { data: urlData } = sb.storage.from('shop-images').getPublicUrl(path);
@@ -37,7 +52,6 @@ async function uploadImage(file, folder) {
 }
 
 async function loadFromCloud() {
-  if (!sb) return false;
   const { data: settings, error: sErr } = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
   if (sErr) {
     if (String(sErr.message || '').includes('relation') || sErr.code === '42P01') {
@@ -69,9 +83,7 @@ async function loadFromCloud() {
     id: p.id, name: p.name, categoryId: p.category_id,
     priceUsd: Number(p.price_usd) || 0, priceSyp: Number(p.price_syp) || 0,
     image: p.image_url || null, hidden: !!p.hidden, sort_order: p.sort_order,
-    condition: p.condition || 'new',
-    storage: p.storage || '',
-    ram: p.ram || '',
+    condition: p.condition || 'new', storage: p.storage || '', ram: p.ram || '',
     battery: p.battery != null ? Number(p.battery) : null,
     cleanliness: p.cleanliness != null ? Number(p.cleanliness) : null,
     description: p.description || ''
@@ -128,9 +140,7 @@ async function upsertProduct(p, sortOrder) {
     price_usd: p.priceUsd, price_syp: p.priceSyp,
     image_url: p.image || null, hidden: !!p.hidden,
     sort_order: sortOrder != null ? sortOrder : data.products.findIndex(x => x.id === p.id),
-    condition: p.condition || 'new',
-    storage: p.storage || '',
-    ram: p.ram || '',
+    condition: p.condition || 'new', storage: p.storage || '', ram: p.ram || '',
     battery: p.battery != null && p.battery !== '' ? Number(p.battery) : null,
     cleanliness: p.cleanliness != null && p.cleanliness !== '' ? Number(p.cleanliness) : null,
     description: p.description || ''
@@ -163,3 +173,7 @@ async function saveProductOrder() {
     if (error) { showToast('خطأ الترتيب: ' + error.message); return; }
   }
 }
+
+const SVG_WA = '💬';
+const SVG_FB = '📘';
+const SVG_IG = '📸';
