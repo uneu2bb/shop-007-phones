@@ -8,7 +8,10 @@
     return {
       condition: e.condition || 'new',
       storage: e.storage || '',
-      battery: e.battery != null ? e.battery : null
+      battery: e.battery != null ? e.battery : null,
+      ram: e.ram || '',
+      cleanliness: e.cleanliness != null ? e.cleanliness : null,
+      description: e.description || ''
     };
   }
   function setExtra(id, obj) {
@@ -185,8 +188,12 @@
       var badge = '<span class="cond-badge '+badgeClass+'">'+conditionLabel(ex.condition)+'</span>';
 
       var storageHtml = ex.storage ? '<div class="meta-line storage">'+escapeHtml(ex.storage)+'</div>' : '';
+      var ramHtml = ex.ram ? '<div class="meta-line ram">رام '+escapeHtml(ex.ram)+'</div>' : '';
       var batteryHtml = (ex.battery != null && ex.battery !== '')
         ? '<div class="meta-line battery"><span class="bat-val">'+escapeHtml(String(ex.battery))+'%</span> البطارية</div>'
+        : '';
+      var cleanHtml = (ex.cleanliness != null && ex.cleanliness !== '')
+        ? '<div class="meta-line clean">نظافة '+escapeHtml(String(ex.cleanliness))+'/100</div>'
         : '';
 
       var wa = waLink(p.name);
@@ -203,7 +210,7 @@
         '</div>' +
         '<div class="product-body">' +
           '<div class="product-name">'+escapeHtml(p.name)+'</div>' +
-          storageHtml + batteryHtml +
+          storageHtml + ramHtml + batteryHtml + cleanHtml +
           '<div class="product-price">' +
             '<div class="price-usd">$'+Number(p.priceUsd).toLocaleString()+'</div>' +
             '<div class="price-syp">'+Number(p.priceSyp).toLocaleString()+' ل.س</div>' +
@@ -215,9 +222,74 @@
       var editBtn = card.querySelector('.card-edit-btn');
       if (editBtn) editBtn.onclick = function(e){ e.stopPropagation(); openEditProduct(p.id); };
       if (adminUnlocked && typeof setupFrontDrag === 'function') setupFrontDrag(card);
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', function(e) {
+        if (e.target.closest('.add-cart-btn') || e.target.closest('.wa-fab') || e.target.closest('.card-edit-btn')) return;
+        openProductDetail(p.id);
+      });
       grid.appendChild(card);
     });
   };
+
+  function openProductDetail(id) {
+    var p = (data.products || []).find(function(x){ return x.id === id; });
+    if (!p) return;
+    var ex = getExtra(id);
+    var modal = document.getElementById('productDetailModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'productDetailModal';
+      modal.className = 'modal-overlay edit-layer';
+      modal.innerHTML = '<div class="lux-modal product-detail-modal"><div class="lux-glow"></div>' +
+        '<button type="button" class="close-btn pd-close" id="closeProductDetail">&times;</button>' +
+        '<div class="pd-body" id="productDetailBody"></div></div>';
+      document.body.appendChild(modal);
+      modal.addEventListener('click', function(e){ if (e.target === modal) closeProductDetail(); });
+      document.getElementById('closeProductDetail').onclick = closeProductDetail;
+    }
+    var body = document.getElementById('productDetailBody');
+    var img = p.image
+      ? '<img class="pd-img" src="'+p.image+'" alt="'+escapeHtml(p.name)+'">' 
+      : '<div class="pd-img pd-ph">📱</div>';
+    var specs = [];
+    specs.push(['الحالة', conditionLabel(ex.condition)]);
+    if (ex.storage) specs.push(['السعة', ex.storage]);
+    if (ex.ram) specs.push(['الرام', ex.ram]);
+    if (ex.battery != null && ex.battery !== '') specs.push(['البطارية', ex.battery + '%']);
+    if (ex.cleanliness != null && ex.cleanliness !== '') specs.push(['نظافة الجهاز', ex.cleanliness + '/100']);
+    var specsHtml = specs.map(function(row){
+      return '<div class="pd-spec"><span class="pd-spec-label">'+escapeHtml(row[0])+'</span><span class="pd-spec-val">'+escapeHtml(String(row[1]))+'</span></div>';
+    }).join('');
+    var descHtml = ex.description
+      ? '<div class="pd-desc"><h4>الوصف</h4><p>'+escapeHtml(ex.description).replace(/\n/g,'<br>')+'</p></div>'
+      : '';
+    var wa = waLink(p.name);
+    var waBtn = wa
+      ? '<a class="btn btn-primary pd-wa" href="'+wa+'" target="_blank" rel="noopener">تواصل واتساب</a>'
+      : '';
+    body.innerHTML =
+      '<div class="pd-media">'+img+'</div>' +
+      '<div class="pd-info">' +
+        '<span class="pd-badge '+(ex.condition==='used'?'badge-used':'badge-new')+'">'+conditionLabel(ex.condition)+'</span>' +
+        '<h2 class="pd-title">'+escapeHtml(p.name)+'</h2>' +
+        '<div class="pd-price"><span class="price-usd">$'+Number(p.priceUsd).toLocaleString()+'</span>' +
+        '<span class="price-syp">'+Number(p.priceSyp).toLocaleString()+' ل.س</span></div>' +
+        '<div class="pd-specs">'+specsHtml+'</div>' +
+        descHtml +
+        '<div class="pd-actions">' +
+          '<button type="button" class="btn btn-primary" id="pdAddCart">أضف إلى السلة</button>' +
+          waBtn +
+        '</div>' +
+      '</div>';
+    var ac = document.getElementById('pdAddCart');
+    if (ac) ac.onclick = function(){ addToCart(p.id); };
+    modal.classList.add('show','edit-layer');
+  }
+  function closeProductDetail() {
+    var m = document.getElementById('productDetailModal');
+    if (m) m.classList.remove('show','edit-layer');
+  }
+  window.openProductDetail = openProductDetail;
 
   function ensureEditExtraFields() {
     var body = document.querySelector('#editProductModal .edit-body');
@@ -230,8 +302,13 @@
       '<option value="new">جديد</option><option value="used">مستعمل</option></select></div>' +
       '<div class="form-row">' +
       '<div class="form-group"><label>السعة (مثال 256GB)</label><input type="text" class="form-control lux-input" id="editProductStorage" placeholder="256GB"></div>' +
+      '<div class="form-group"><label>الرام (مثال 8GB)</label><input type="text" class="form-control lux-input" id="editProductRam" placeholder="8GB"></div>' +
+      '</div>' +
+      '<div class="form-row">' +
       '<div class="form-group"><label>البطارية %</label><input type="number" class="form-control lux-input" id="editProductBattery" min="0" max="100" placeholder="100"></div>' +
-      '</div>';
+      '<div class="form-group"><label>نظافة الجهاز من 100</label><input type="number" class="form-control lux-input" id="editProductClean" min="0" max="100" placeholder="100"></div>' +
+      '</div>' +
+      '<div class="form-group"><label>وصف الجهاز</label><textarea class="form-control lux-input" id="editProductDesc" rows="3" placeholder="مواصفات إضافية، ملاحظات..."></textarea></div>';
     var actions = body.querySelector('.edit-actions');
     if (actions) body.insertBefore(div, actions);
     else body.appendChild(div);
@@ -245,9 +322,15 @@
     var c = document.getElementById('editProductCondition');
     var s = document.getElementById('editProductStorage');
     var b = document.getElementById('editProductBattery');
+    var r = document.getElementById('editProductRam');
+    var cl = document.getElementById('editProductClean');
+    var d = document.getElementById('editProductDesc');
     if (c) c.value = ex.condition || 'new';
     if (s) s.value = ex.storage || '';
     if (b) b.value = ex.battery != null ? ex.battery : '';
+    if (r) r.value = ex.ram || '';
+    if (cl) cl.value = ex.cleanliness != null ? ex.cleanliness : '';
+    if (d) d.value = ex.description || '';
   };
 
   function hookSave() {
@@ -260,10 +343,16 @@
         var c = document.getElementById('editProductCondition');
         var s = document.getElementById('editProductStorage');
         var b = document.getElementById('editProductBattery');
+        var r = document.getElementById('editProductRam');
+        var cl = document.getElementById('editProductClean');
+        var d = document.getElementById('editProductDesc');
         setExtra(editingProductId, {
           condition: c ? c.value : 'new',
           storage: s ? s.value.trim() : '',
-          battery: b && b.value !== '' ? Number(b.value) : null
+          battery: b && b.value !== '' ? Number(b.value) : null,
+          ram: r ? r.value.trim() : '',
+          cleanliness: cl && cl.value !== '' ? Number(cl.value) : null,
+          description: d ? d.value.trim() : ''
         });
       }
       if (typeof prev === 'function') return prev.call(btn, ev);
