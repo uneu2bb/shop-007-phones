@@ -41,7 +41,7 @@
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'cat-picker-btn';
-    btn.innerHTML = '<span class="cat-picker-icon">📂</span><span class="cat-picker-label">'+escapeHtml(catLabel())+'</span><span class="cat-picker-chevron">▾</span>';
+    btn.innerHTML = '<span class="cat-picker-label">'+escapeHtml(catLabel())+'</span><span class="cat-picker-chevron">▾</span>';
     btn.onclick = openCatPicker;
     wrap.appendChild(btn);
     nav.appendChild(wrap);
