@@ -1,64 +1,63 @@
 (function(){
-  function currentShopName() {
-    var shop = '';
-    try {
-      if (window.data && data.shopName) shop = String(data.shopName).trim();
-    } catch (e) {}
-    if (!shop) {
-      var el = document.getElementById('shopName');
-      if (el) shop = (el.textContent || '').trim();
-    }
-    if (!shop) {
-      var inp = document.getElementById('shopNameInput');
-      if (inp && inp.value) shop = String(inp.value).trim();
-    }
-    return shop || '007';
+  function shopName(){
+    try{ if(data&&data.shopName) return String(data.shopName).trim(); }catch(e){}
+    var el=document.getElementById('shopName');
+    if(el&&el.textContent) return el.textContent.trim();
+    var inp=document.getElementById('shopNameInput');
+    if(inp&&inp.value) return String(inp.value).trim();
+    return '007';
   }
-
-  function buildOrderMessage() {
-    if (!window.cart || !cart.length) return null;
-    var shop = currentShopName();
-    var msg = 'طلب من محل ' + shop + ':\n\n';
-    cart.forEach(function(i) {
-      msg += '• ' + i.name + ' × ' + i.qty + ' — $' + (i.priceUsd * i.qty) + ' / ' + (i.priceSyp * i.qty).toLocaleString() + ' ل.س\n';
+  function checkout(){
+    if(!window.cart||!cart.length){
+      if(typeof showToast==='function') showToast('السلة فارغة');
+      return;
+    }
+    var shop=shopName();
+    var lines=['طلب من محل '+shop+':',''];
+    cart.forEach(function(i){
+      lines.push('• '+i.name+' × '+i.qty+' — $'+(i.priceUsd*i.qty)+' / '+(i.priceSyp*i.qty).toLocaleString()+' ل.س');
     });
-    var totalUsd = cart.reduce(function(s, i){ return s + i.priceUsd * i.qty; }, 0);
-    var totalSyp = cart.reduce(function(s, i){ return s + i.priceSyp * i.qty; }, 0);
-    msg += '\nالمجموع: $' + totalUsd.toLocaleString() + ' / ' + totalSyp.toLocaleString() + ' ل.س';
-    return msg;
-  }
-
-  window.buildWhatsAppOrderMessage = buildOrderMessage;
-  window.getShopNameForOrder = currentShopName;
-
-  function doCheckout() {
-    var msg = buildOrderMessage();
-    if (!msg) return;
-    var phone = String((window.data && data.whatsapp) || '').replace(/[^0-9]/g, '');
-    if (phone) {
-      window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
-    } else if (typeof showToast === 'function') {
-      showToast('أضف رقم واتساب من لوحة التحكم أولاً');
+    var totalUsd=cart.reduce(function(s,i){return s+i.priceUsd*i.qty;},0);
+    var totalSyp=cart.reduce(function(s,i){return s+i.priceSyp*i.qty;},0);
+    lines.push('');
+    lines.push('المجموع: $'+totalUsd.toLocaleString()+' / '+totalSyp.toLocaleString()+' ل.س');
+    var msg=lines.join('\n');
+    var phone=String((window.data&&data.whatsapp)||'').replace(/[^0-9]/g,'');
+    if(!phone){
+      if(typeof showToast==='function') showToast('أضف رقم واتساب من لوحة التحكم أولاً');
+      else alert('أضف رقم واتساب من لوحة التحكم أولاً');
+      return;
+    }
+    var url='https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
+    var opened=false;
+    try{
+      var w=window.open(url,'_blank');
+      opened=!!w;
+    }catch(e){}
+    if(!opened){
+      window.location.href=url;
     }
   }
-
-  function bindCheckout() {
-    var btn = document.getElementById('checkoutBtn');
-    if (!btn) return;
-    btn.onclick = doCheckout;
-  }
-
-  bindCheckout();
-  setTimeout(bindCheckout, 200);
-  setTimeout(bindCheckout, 800);
-  setTimeout(bindCheckout, 2000);
-
-  var _rs = window.renderSite;
-  if (typeof _rs === 'function' && !_rs._checkoutPatched) {
-    window.renderSite = function() {
-      _rs.apply(this, arguments);
-      bindCheckout();
+  function bind(){
+    var btn=document.getElementById('checkoutBtn');
+    if(!btn) return;
+    btn.onclick=function(e){
+      if(e){ e.preventDefault(); e.stopPropagation(); }
+      checkout();
     };
-    window.renderSite._checkoutPatched = true;
   }
+  bind();
+  setTimeout(bind,100);
+  setTimeout(bind,500);
+  setTimeout(bind,1500);
+  setTimeout(bind,3000);
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    if(!t) return;
+    if(t.id==='checkoutBtn'||(t.closest&&t.closest('#checkoutBtn'))){
+      e.preventDefault();
+      e.stopPropagation();
+      checkout();
+    }
+  },true);
 })();
