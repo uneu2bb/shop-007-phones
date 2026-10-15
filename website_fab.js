@@ -101,14 +101,26 @@
     }catch(e){}
   }
 
+  async function fetchExistingMeta(){
+    if(typeof sb==='undefined'||!sb) return {};
+    try{
+      var pub = sb.storage.from('shop-images').getPublicUrl(META_PATH).data.publicUrl;
+      var res = await fetch(pub + '?t=' + Date.now(), {cache:'no-store'});
+      if(!res.ok) return {};
+      var meta = await res.json();
+      return meta && typeof meta === 'object' ? meta : {};
+    }catch(e){ return {}; }
+  }
+
   async function saveMeta(){
     if(typeof sb==='undefined'||!sb) return false;
     try{
-      var meta = {
-        footerDesc: (data.footerDesc||''),
-        website: (data.website||''),
-        websiteName: (data.websiteName||'')
-      };
+      var existing = await fetchExistingMeta();
+      var meta = Object.assign({}, existing, {
+        footerDesc: (data.footerDesc != null ? data.footerDesc : (existing.footerDesc || '')),
+        website: (data.website != null ? data.website : (existing.website || '')),
+        websiteName: (data.websiteName != null ? data.websiteName : (existing.websiteName || ''))
+      });
       var blob = new Blob([JSON.stringify(meta)], {type:'application/json'});
       var r = await sb.storage.from('shop-images').upload(META_PATH, blob, {
         upsert:true, contentType:'application/json', cacheControl:'0'
@@ -304,11 +316,27 @@
     window.renderSite._webPatched = true;
   }
 
+  function hookCloudLoad(){
+    if(typeof loadFromCloud !== 'function' || loadFromCloud._webMeta) return;
+    var L = loadFromCloud;
+    loadFromCloud = async function(){
+      var ok = await L.apply(this, arguments);
+      try{
+        await loadMeta();
+        ensureWebFab();
+        fillWebsiteField();
+      }catch(e){}
+      return ok;
+    };
+    loadFromCloud._webMeta = true;
+  }
+
   setTimeout(async function(){
+    hookCloudLoad();
     await loadMeta();
     boot();
     if(typeof renderSite==='function') try{ renderSite(); }catch(e){}
   }, 600);
-  setTimeout(boot, 1500);
-  setTimeout(boot, 3000);
+  setTimeout(function(){ hookCloudLoad(); boot(); }, 1500);
+  setTimeout(function(){ hookCloudLoad(); boot(); }, 3000);
 })();
