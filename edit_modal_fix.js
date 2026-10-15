@@ -1,20 +1,26 @@
 (function(){
-  var STYLE_ID = 'edit-modal-fix-css';
+  var STYLE_ID = 'edit-modal-fix-css-v2';
   var editingCategoryId = null;
 
   function injectCss(){
+    var old = document.getElementById('edit-modal-fix-css');
+    if(old) old.remove();
     if(document.getElementById(STYLE_ID)) return;
     var s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent = [
+      '/* === Edit Modal - Better Mobile Scroll === */',
       '#editProductModal.modal-overlay,',
       '#editCategoryModal.modal-overlay{',
-      '  z-index: 1600 !important;',
+      '  z-index: 3000 !important;',
       '  display: none;',
       '  align-items: flex-end;',
+      '  justify-content: center;',
       '  padding: 0;',
-      '  background: rgba(0,0,0,.82);',
-      '  backdrop-filter: blur(10px);',
+      '  background: rgba(0,0,0,.88);',
+      '  backdrop-filter: blur(12px);',
+      '  -webkit-backdrop-filter: blur(12px);',
+      '  overscroll-behavior: contain;',
       '}',
       '#editProductModal.modal-overlay.show,',
       '#editCategoryModal.modal-overlay.show{',
@@ -27,17 +33,22 @@
       '#editProductModal .edit-modal,',
       '#editCategoryModal .edit-modal{',
       '  max-width:440px;width:100%;margin:0;',
-      '  max-height:92vh;max-height:92dvh;',
+      '  height: min(94dvh, 94vh);',
+      '  max-height: min(94dvh, 94vh);',
       '  display:flex;flex-direction:column;',
       '  border-radius:22px 22px 0 0;',
       '  background:linear-gradient(180deg,#1c1a14,#12100c);',
       '  border:1px solid rgba(201,162,39,.3);',
       '  box-shadow:0 -8px 40px rgba(0,0,0,.55);',
       '  overflow:hidden;',
+      '  position:relative;',
       '}',
       '@media(min-width:600px){',
       '  #editProductModal .edit-modal,',
-      '  #editCategoryModal .edit-modal{border-radius:22px;margin:auto;}',
+      '  #editCategoryModal .edit-modal{',
+      '    border-radius:22px;margin:auto;',
+      '    height:auto;max-height:90vh;max-height:90dvh;',
+      '  }',
       '}',
       '#editProductModal .modal-header-lux,',
       '#editCategoryModal .modal-header-lux{',
@@ -45,6 +56,7 @@
       '  border-bottom:1px solid rgba(201,162,39,.2);',
       '  display:flex;align-items:center;justify-content:space-between;',
       '  background:linear-gradient(180deg,rgba(201,162,39,.1),transparent);',
+      '  position:sticky;top:0;z-index:2;',
       '}',
       '#editProductModal .modal-header-lux h2,',
       '#editCategoryModal .modal-header-lux h2{',
@@ -54,14 +66,28 @@
       '}',
       '#editProductModal .edit-body,',
       '#editCategoryModal .edit-body{',
-      '  padding:1rem 1.15rem .5rem;overflow-y:auto;-webkit-overflow-scrolling:touch;',
-      '  flex:1 1 auto;min-height:0;',
+      '  padding: 0.85rem 1.15rem 1.25rem;',
+      '  overflow-y: auto !important;',
+      '  overflow-x: hidden;',
+      '  -webkit-overflow-scrolling: touch;',
+      '  overscroll-behavior: contain;',
+      '  flex: 1 1 auto;',
+      '  min-height: 0;',
+      '  max-height: none;',
+      '  touch-action: pan-y;',
+      '  scroll-behavior: smooth;',
+      '}',
+      '#editProductModal .edit-body::after,',
+      '#editCategoryModal .edit-body::after{',
+      '  content:"";display:block;height:24px;',
       '}',
       '#editProductModal .edit-actions,',
       '#editCategoryModal .edit-actions{',
       '  display:flex;gap:10px;flex-shrink:0;',
-      '  padding:12px 1.15rem calc(12px + env(safe-area-inset-bottom,0px));',
-      '  border-top:1px solid rgba(201,162,39,.2);background:#14120e;',
+      '  padding:12px 1.15rem calc(14px + env(safe-area-inset-bottom,0px));',
+      '  border-top:1px solid rgba(201,162,39,.2);',
+      '  background:#14120e;',
+      '  position:relative;z-index:2;',
       '}',
       '#editProductModal .edit-actions .btn,',
       '#editCategoryModal .edit-actions .btn{',
@@ -84,9 +110,42 @@
       '  border-radius:12px;padding:12px 14px;color:#f0ebe0;',
       '  font-family:inherit;font-size:16px;width:100%;box-sizing:border-box;',
       '}',
+      '#editProductModal .form-group,',
+      '#editCategoryModal .form-group{',
+      '  margin-bottom: 0.85rem;',
+      '}',
+      '#editProductModal .form-row{',
+      '  display:flex;gap:10px;margin-bottom:0.85rem;',
+      '}',
+      '#editProductModal .form-row .form-group{',
+      '  flex:1;margin-bottom:0;',
+      '}',
+      '#editProductModal label,',
+      '#editCategoryModal label{',
+      '  display:block;margin-bottom:6px;font-size:0.88rem;color:#c9a227;font-weight:600;',
+      '}',
+      'body.edit-modal-open{',
+      '  overflow: hidden !important;',
+      '  touch-action: none;',
+      '  position: fixed;',
+      '  width: 100%;',
+      '  height: 100%;',
+      '}',
       '#adminModal.modal-overlay{z-index:1300;}'
     ].join('\n');
     (document.head||document.documentElement).appendChild(s);
+  }
+
+  function lockBody(lock){
+    try{
+      if(lock){
+        document.body.classList.add('edit-modal-open');
+        document.documentElement.style.overflow = 'hidden';
+      } else {
+        document.body.classList.remove('edit-modal-open');
+        document.documentElement.style.overflow = '';
+      }
+    }catch(e){}
   }
 
   function showModal(id){
@@ -94,13 +153,15 @@
     if(!m) return;
     m.classList.add('show');
     m.style.display = 'flex';
-    m.style.zIndex = '1600';
+    m.style.zIndex = '3000';
+    lockBody(true);
   }
   function hideModal(id){
     var m = document.getElementById(id);
     if(!m) return;
     m.classList.remove('show');
     m.style.display = 'none';
+    lockBody(false);
   }
 
   window.openEditProduct = function(id){
@@ -135,8 +196,9 @@
 
     showModal('editProductModal');
     setTimeout(function(){
-      if(nameEl){ try{ nameEl.focus(); }catch(e){} }
-    }, 300);
+      var body = document.querySelector('#editProductModal .edit-body');
+      if(body){ try{ body.scrollTop = 0; }catch(e){} }
+    }, 50);
   };
 
   window.editCategory = function(id){
