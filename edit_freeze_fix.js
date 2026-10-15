@@ -1,181 +1,203 @@
 (function(){
   var opening = false;
-  var lastId = null;
 
-  function showEditModal(){
-    var m = document.getElementById('editProductModal');
+  function $(id){ return document.getElementById(id); }
+
+  function showModal(){
+    var m = $('editProductModal');
     if(!m) return;
-    m.style.zIndex = '1600';
-    m.style.position = 'fixed';
-    m.style.inset = '0';
-    m.style.display = 'flex';
-    m.style.alignItems = 'flex-end';
-    m.style.justifyContent = 'center';
-    m.style.background = 'rgba(0,0,0,.82)';
     m.classList.add('show');
+    m.style.cssText = 'display:flex!important;z-index:2000!important;position:fixed;inset:0;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.85);padding:0;';
   }
 
-  function hideEditModal(){
-    var m = document.getElementById('editProductModal');
+  function hideModal(){
+    var m = $('editProductModal');
     if(!m) return;
     m.classList.remove('show');
     m.style.display = 'none';
-  }
-
-  function ensureExtrasOnce(){
-    try{
-      var body = document.querySelector('#editProductModal .edit-body');
-      if(!body || document.getElementById('editProductCondition')) return;
-      var div = document.createElement('div');
-      div.className = 'edit-extra-fields';
-      div.innerHTML =
-        '<div class="form-group"><label>\u0627\u0644\u062d\u0627\u0644\u0629</label>' +
-        '<select id="editProductCondition" class="form-control lux-input">' +
-        '<option value="new">\u062c\u062f\u064a\u062f</option><option value="used">\u0645\u0633\u062a\u0639\u0645\u0644</option></select></div>' +
-        '<div class="form-row">' +
-        '<div class="form-group"><label>\u0627\u0644\u0633\u0639\u0629</label><input type="text" class="form-control lux-input" id="editProductStorage" placeholder="256GB"></div>' +
-        '<div class="form-group"><label>\u0627\u0644\u0631\u0627\u0645</label><input type="text" class="form-control lux-input" id="editProductRam" placeholder="8GB"></div>' +
-        '</div>' +
-        '<div class="form-row">' +
-        '<div class="form-group"><label>\u0627\u0644\u0628\u0637\u0627\u0631\u064a\u0629 %</label><input type="number" class="form-control lux-input" id="editProductBattery" min="0" max="100"></div>' +
-        '<div class="form-group"><label>\u0646\u0638\u0627\u0641\u0629 \u0627\u0644\u062c\u0647\u0627\u0632</label><input type="number" class="form-control lux-input" id="editProductClean" min="0" max="100"></div>' +
-        '</div>' +
-        '<div class="form-group"><label>\u0648\u0635\u0641 \u0627\u0644\u062c\u0647\u0627\u0632</label><textarea class="form-control lux-input" id="editProductDesc" rows="2"></textarea></div>' +
-        '<div class="form-group"><label>\u0627\u0644\u0623\u0644\u0648\u0627\u0646 \u0627\u0644\u0645\u062a\u0648\u0641\u0631\u0629</label>' +
-        '<input type="text" class="form-control lux-input" id="editProductColors" placeholder="\u0623\u0633\u0648\u062f\u060c \u0630\u0647\u0628\u064a\u060c \u0641\u0636\u064a">' +
-        '<div style="font-size:.72rem;color:#888;margin-top:4px">\u0627\u0641\u0635\u0644 \u0628\u064a\u0646 \u0627\u0644\u0623\u0644\u0648\u0627\u0646 \u0628\u0641\u0627\u0635\u0644\u0629 \u060c</div></div>';
-      body.appendChild(div);
-    }catch(e){}
-  }
-
-  function fillFields(id){
-    var p = null;
-    try{ p = (data.products||[]).find(function(x){ return x.id === id; }); }catch(e){}
-    if(!p) return;
-
-    window.editingProductId = id;
-    try{ editingProductId = id; }catch(e){}
-
-    var nameEl = document.getElementById('editProductName');
-    var usdEl = document.getElementById('editProductUsd');
-    var sypEl = document.getElementById('editProductSyp');
-    if(nameEl) nameEl.value = p.name || '';
-    if(usdEl) usdEl.value = p.priceUsd != null ? p.priceUsd : '';
-    if(sypEl) sypEl.value = p.priceSyp != null ? p.priceSyp : '';
-
-    var img = document.getElementById('editProductPreview');
-    var ph = document.getElementById('editProductPreviewPh');
-    if(img){
-      img.style.maxHeight = '160px';
-      img.style.maxWidth = '100%';
-      img.style.objectFit = 'contain';
-      if(p.image){
-        img.src = p.image;
-        img.style.display = 'block';
-        if(ph) ph.style.display = 'none';
-      } else {
-        img.removeAttribute('src');
-        img.style.display = 'none';
-        if(ph) ph.style.display = 'flex';
-      }
-    }
-
-    var ex = { condition:'new', storage:'', ram:'', battery:null, cleanliness:null, description:'', colors:'' };
-    try{
-      if(typeof getExtra === 'function'){
-        var g = getExtra(id);
-        if(g) ex = Object.assign(ex, g);
-      }
-    }catch(e){}
-    if(p.condition) ex.condition = p.condition;
-    if(p.storage) ex.storage = p.storage;
-    if(p.ram) ex.ram = p.ram;
-    if(p.battery != null) ex.battery = p.battery;
-    if(p.cleanliness != null) ex.cleanliness = p.cleanliness;
-    if(p.description) ex.description = p.description;
-    if(p.colors) ex.colors = p.colors;
-
-    function set(eid, val){
-      var el = document.getElementById(eid);
-      if(el) el.value = val != null ? val : '';
-    }
-    set('editProductCondition', ex.condition || 'new');
-    set('editProductStorage', ex.storage || '');
-    set('editProductRam', ex.ram || '');
-    set('editProductBattery', ex.battery != null ? ex.battery : '');
-    set('editProductClean', ex.cleanliness != null ? ex.cleanliness : '');
-    set('editProductDesc', ex.description || '');
-    set('editProductColors', ex.colors || '');
-  }
-
-  window.openEditProduct = function(id){
-    if(opening && lastId === id) return;
-    opening = true;
-    lastId = id;
-
-    try{
-      ensureExtrasOnce();
-      fillFields(id);
-      showEditModal();
-
-      var btn = document.getElementById('editUploadImgBtn');
-      if(btn){
-        btn.style.background = 'linear-gradient(145deg,#e8c547,#c9a227)';
-        btn.style.color = '#1a1205';
-        btn.style.borderRadius = '14px';
-        btn.style.padding = '11px 18px';
-        btn.style.fontWeight = '700';
-        btn.style.border = 'none';
-      }
-    }catch(e){
-      console.warn('openEditProduct', e);
-      try{ showEditModal(); }catch(e2){}
-    }
-
-    setTimeout(function(){ opening = false; }, 400);
-  };
-
-  function hideEditModalSafe(){
-    hideEditModal();
     opening = false;
   }
 
-  function bindClose(){
-    var closeBtn = document.getElementById('closeEditProduct');
-    var cancelBtn = document.getElementById('cancelEditProduct');
-    var modal = document.getElementById('editProductModal');
-    if(closeBtn) closeBtn.onclick = hideEditModalSafe;
-    if(cancelBtn) cancelBtn.onclick = hideEditModalSafe;
-    if(modal && !modal._safeClose){
-      modal._safeClose = true;
-      modal.addEventListener('click', function(e){
-        if(e.target === modal) hideEditModalSafe();
+  function ensureFields(){
+    var body = document.querySelector('#editProductModal .edit-body');
+    if(!body || $('editProductCondition')) return;
+    var div = document.createElement('div');
+    div.id = 'editExtrasBox';
+    div.innerHTML =
+      '<div class="form-group"><label>\u0627\u0644\u062d\u0627\u0644\u0629</label>' +
+      '<select id="editProductCondition" class="form-control lux-input"><option value="new">\u062c\u062f\u064a\u062f</option><option value="used">\u0645\u0633\u062a\u0639\u0645\u0644</option></select></div>' +
+      '<div class="form-row"><div class="form-group"><label>\u0627\u0644\u0633\u0639\u0629</label><input type="text" class="form-control lux-input" id="editProductStorage"></div>' +
+      '<div class="form-group"><label>\u0627\u0644\u0631\u0627\u0645</label><input type="text" class="form-control lux-input" id="editProductRam"></div></div>' +
+      '<div class="form-row"><div class="form-group"><label>\u0627\u0644\u0628\u0637\u0627\u0631\u064a\u0629 %</label><input type="number" class="form-control lux-input" id="editProductBattery" min="0" max="100"></div>' +
+      '<div class="form-group"><label>\u0646\u0638\u0627\u0641\u0629 \u0627\u0644\u062c\u0647\u0627\u0632</label><input type="number" class="form-control lux-input" id="editProductClean" min="0" max="100"></div></div>' +
+      '<div class="form-group"><label>\u0648\u0635\u0641 \u0627\u0644\u062c\u0647\u0627\u0632</label><textarea class="form-control lux-input" id="editProductDesc" rows="2"></textarea></div>' +
+      '<div class="form-group"><label>\u0627\u0644\u0623\u0644\u0648\u0627\u0646 \u0627\u0644\u0645\u062a\u0648\u0641\u0631\u0629</label><input type="text" class="form-control lux-input" id="editProductColors" placeholder="\u0623\u0633\u0648\u062f\u060c \u0630\u0647\u0628\u064a\u060c \u0641\u0636\u064a"></div>';
+    body.appendChild(div);
+  }
+
+  function setVal(id, v){
+    var el = $(id);
+    if(el) el.value = (v != null && v !== undefined) ? v : '';
+  }
+
+  function openEdit(id){
+    if(opening) return;
+    opening = true;
+    try {
+      if(typeof data === 'undefined' || !data.products){
+        opening = false;
+        return;
+      }
+      var p = data.products.find(function(x){ return String(x.id) === String(id); });
+      if(!p){
+        opening = false;
+        if(typeof showToast === 'function') showToast('\u0627\u0644\u0645\u0646\u062a\u062c \u063a\u064a\u0631 \u0645\u0648\u062c\u0648\u062f');
+        return;
+      }
+
+      window.editingProductId = p.id;
+      try { editingProductId = p.id; } catch(e){}
+
+      ensureFields();
+
+      setVal('editProductName', p.name);
+      setVal('editProductUsd', p.priceUsd);
+      setVal('editProductSyp', p.priceSyp);
+
+      var img = $('editProductPreview');
+      var ph = $('editProductPreviewPh');
+      if(img){
+        img.style.maxHeight = '150px';
+        img.style.maxWidth = '100%';
+        img.style.objectFit = 'contain';
+        if(p.image){
+          img.src = p.image;
+          img.style.display = 'block';
+          if(ph) ph.style.display = 'none';
+        } else {
+          img.removeAttribute('src');
+          img.style.display = 'none';
+          if(ph) ph.style.display = 'flex';
+        }
+      }
+
+      var cond = p.condition || 'new';
+      var storage = p.storage || '';
+      var ram = p.ram || '';
+      var battery = p.battery != null ? p.battery : '';
+      var clean = p.cleanliness != null ? p.cleanliness : '';
+      var desc = p.description || '';
+      var colors = p.colors || '';
+      try {
+        if(typeof getExtra === 'function'){
+          var ex = getExtra(p.id);
+          if(ex){
+            if(ex.condition) cond = ex.condition;
+            if(ex.storage) storage = ex.storage;
+            if(ex.ram) ram = ex.ram;
+            if(ex.battery != null) battery = ex.battery;
+            if(ex.cleanliness != null) clean = ex.cleanliness;
+            if(ex.description) desc = ex.description;
+            if(ex.colors) colors = ex.colors;
+          }
+        }
+      } catch(e){}
+
+      setVal('editProductCondition', cond);
+      setVal('editProductStorage', storage);
+      setVal('editProductRam', ram);
+      setVal('editProductBattery', battery);
+      setVal('editProductClean', clean);
+      setVal('editProductDesc', desc);
+      setVal('editProductColors', colors);
+
+      showModal();
+    } catch(err){
+      console.warn('openEdit error', err);
+      try { showModal(); } catch(e2){}
+    }
+    setTimeout(function(){ opening = false; }, 300);
+  }
+
+  function lockOpenEdit(){
+    try {
+      Object.defineProperty(window, 'openEditProduct', {
+        value: openEdit,
+        writable: true,
+        configurable: true
       });
+    } catch(e){
+      window.openEditProduct = openEdit;
+    }
+  }
+  lockOpenEdit();
+
+  var n = 0;
+  var iv = setInterval(function(){
+    lockOpenEdit();
+    n++;
+    if(n > 20) clearInterval(iv);
+  }, 250);
+
+  function onAdminClick(e){
+    var t = e.target;
+    if(!t) return;
+    var editBtn = t.closest ? t.closest('[data-act="edit"]') : null;
+    if(!editBtn){
+      if(t.tagName === 'BUTTON' && (t.textContent||'').trim() === '\u062a\u0639\u062f\u064a\u0644'){
+        editBtn = t;
+      }
+    }
+    if(editBtn){
+      var li = editBtn.closest('[data-id]');
+      if(!li) li = editBtn.closest('li');
+      if(li){
+        var id = li.getAttribute('data-id');
+        if(id){
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          openEdit(id);
+          return false;
+        }
+      }
     }
   }
 
-  function bindAdminDelegation(){
-    var list = document.getElementById('productsList');
-    if(!list || list._editDeleg) return;
-    list._editDeleg = true;
-    list.addEventListener('click', function(e){
-      var btn = e.target.closest('[data-act="edit"]');
-      if(!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      var li = btn.closest('[data-id]');
-      if(!li) return;
-      var id = li.getAttribute('data-id');
-      if(id) window.openEditProduct(id);
+  function bindCapture(){
+    if(document._editCaptureBound) return;
+    document._editCaptureBound = true;
+    document.addEventListener('click', function(e){
+      var admin = $('adminModal');
+      if(!admin || !admin.classList.contains('show')) return;
+      onAdminClick(e);
     }, true);
   }
+  bindCapture();
+  setTimeout(bindCapture, 500);
 
+  function bindClose(){
+    var closeBtn = $('closeEditProduct');
+    var cancelBtn = $('cancelEditProduct');
+    if(closeBtn) closeBtn.onclick = function(e){ e && e.preventDefault(); hideModal(); };
+    if(cancelBtn) cancelBtn.onclick = function(e){ e && e.preventDefault(); hideModal(); };
+    var m = $('editProductModal');
+    if(m && !m._closeBound2){
+      m._closeBound2 = true;
+      m.addEventListener('click', function(e){ if(e.target === m) hideModal(); });
+    }
+  }
   bindClose();
-  bindAdminDelegation();
-  setTimeout(bindClose, 500);
-  setTimeout(bindAdminDelegation, 500);
-  setTimeout(bindAdminDelegation, 1500);
-  setTimeout(function(){
-    window.openEditProduct = window.openEditProduct;
-  }, 2000);
+  setTimeout(bindClose, 800);
+
+  document.addEventListener('click', function(e){
+    var btn = e.target && e.target.closest && e.target.closest('.card-edit-btn');
+    if(!btn) return;
+    var card = btn.closest('[data-id]');
+    if(card && card.getAttribute('data-id')){
+      e.preventDefault();
+      e.stopPropagation();
+      openEdit(card.getAttribute('data-id'));
+    }
+  }, true);
 })();
