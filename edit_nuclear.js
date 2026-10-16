@@ -57,25 +57,54 @@
   function lockBody(){
     if(bodyScrollLocked) return;
     bodyScrollLocked = true;
-    savedScrollY = window.scrollY || window.pageYOffset || 0;
+    savedScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
     document.body.classList.add('modal-scroll-lock');
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.top = '-' + savedScrollY + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
     document.body.style.width = '100%';
     document.documentElement.style.overflow = 'hidden';
   }
 
   function unlockBody(){
-    if(!bodyScrollLocked) return;
     bodyScrollLocked = false;
-    document.body.classList.remove('modal-scroll-lock');
-    document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    document.documentElement.style.overflow = '';
-    try { window.scrollTo(0, savedScrollY); } catch(e){}
+    try {
+      document.body.classList.remove('modal-scroll-lock');
+      document.body.style.overflow = 'unset';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.touchAction = '';
+      document.documentElement.style.overflow = 'unset';
+      document.documentElement.style.position = '';
+      void document.body.offsetHeight;
+      window.scrollTo(0, savedScrollY || 0);
+      setTimeout(function(){
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+        document.body.classList.remove('modal-scroll-lock');
+      }, 50);
+    } catch(e){
+      try {
+        document.body.style.overflow = 'unset';
+        document.documentElement.style.overflow = 'unset';
+      } catch(e2){}
+    }
+  }
+
+  function ensureUnlocked(){
+    var pm = document.getElementById('editProductModal');
+    var cm = document.getElementById('editCategoryModal');
+    var pOpen = pm && pm.classList.contains('show') && pm.style.display !== 'none';
+    var cOpen = cm && cm.classList.contains('show') && cm.style.display !== 'none';
+    if(pm && pm.style.display === 'none') pOpen = false;
+    if(cm && cm.style.display === 'none') cOpen = false;
+    if(!pOpen && !cOpen) unlockBody();
   }
 
   function getData(){
@@ -98,9 +127,9 @@
     if(!m) return;
     m.classList.remove('show');
     m.style.display = 'none';
-    var pOpen = $('editProductModal') && $('editProductModal').classList.contains('show');
-    var cOpen = $('editCategoryModal') && $('editCategoryModal').classList.contains('show');
-    if(!pOpen && !cOpen) unlockBody();
+    setTimeout(ensureUnlocked, 0);
+    setTimeout(unlockBody, 30);
+    setTimeout(unlockBody, 200);
   }
 
   function setVal(id, v){
@@ -209,6 +238,7 @@
   function install(){
     window.openEditProduct = openProduct;
     window.editCategory = openCategory;
+    window.__unlockBody = unlockBody;
   }
   install();
   injectModalScrollCss();
@@ -266,10 +296,13 @@
       saveProd._scrollUnlock = true;
       saveProd.addEventListener('click', function(){
         setTimeout(function(){
-          var pOpen = $('editProductModal') && $('editProductModal').classList.contains('show') && $('editProductModal').style.display !== 'none';
-          if(!pOpen) unlockBody();
-        }, 600);
-      });
+          var pm = $('editProductModal');
+          if(pm){ pm.classList.remove('show'); pm.style.display = 'none'; }
+          unlockBody();
+        }, 400);
+        setTimeout(unlockBody, 800);
+        setTimeout(unlockBody, 1500);
+      }, true);
     }
 
     var saveCat = $('saveEditCategory');
@@ -293,6 +326,15 @@
   }
   bindClose();
   setTimeout(bindClose, 800);
+
+  setInterval(function(){
+    if(!bodyScrollLocked) return;
+    var pm = document.getElementById('editProductModal');
+    var cm = document.getElementById('editCategoryModal');
+    var pVis = pm && pm.classList.contains('show') && pm.style.display !== 'none';
+    var cVis = cm && cm.classList.contains('show') && cm.style.display !== 'none';
+    if(!pVis && !cVis) unlockBody();
+  }, 1000);
 
   setTimeout(function(){
     try {
