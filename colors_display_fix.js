@@ -22,35 +22,57 @@
     return String(str).split(/[,،|/]+/).map(function(x){return x.trim();}).filter(Boolean);
   }
   function colorHex(name){
-    var n = String(name||'').toLowerCase().replace(/\s+/g,'').trim();
-    var map = {
-      '\u0627\u0633\u0648\u062f':'#1a1a1a','\u0623\u0633\u0648\u062f':'#1a1a1a','black':'#1a1a1a',
-      '\u0627\u0628\u064a\u0636':'#f5f5f5','\u0623\u0628\u064a\u0636':'#f5f5f5','white':'#f5f5f5',
-      '\u0630\u0647\u0628\u064a':'#c9a227','\u0630\u0647\u0628':'#c9a227','gold':'#c9a227',
-      '\u0641\u0636\u064a':'#c0c0c0','silver':'#c0c0c0',
-      '\u0627\u0632\u0631\u0642':'#2b6cb0','\u0623\u0632\u0631\u0642':'#2b6cb0','blue':'#2b6cb0',
-      '\u0627\u062d\u0645\u0631':'#c53030','\u0623\u062d\u0645\u0631':'#c53030','red':'#c53030',
-      '\u0627\u062e\u0636\u0631':'#2f855a','\u0623\u062e\u0636\u0631':'#2f855a','green':'#2f855a',
-      '\u0648\u0631\u062f\u064a':'#d53f8c','pink':'#d53f8c',
-      '\u0628\u0646\u0641\u0633\u062c\u064a':'#6b46c1','purple':'#6b46c1',
-      '\u0631\u0645\u0627\u062f\u064a':'#718096','gray':'#718096','grey':'#718096',
-      '\u062a\u064a\u062a\u0627\u0646\u064a\u0648\u0645':'#8a8580','titanium':'#8a8580',
-      '\u0633\u0645\u0627\u0648\u064a':'#0bc5ea','cyan':'#0bc5ea',
-      '\u0628\u0631\u062a\u0642\u0627\u0644\u064a':'#dd6b20','orange':'#dd6b20',
-      '\u0627\u0635\u0641\u0631':'#d69e2e','\u0623\u0635\u0641\u0631':'#d69e2e','yellow':'#d69e2e',
-      '\u0646\u062d\u0627\u0633\u064a':'#b87333','copper':'#b87333',
-      '\u0628\u064a\u062c':'#d4b896','beige':'#d4b896'
+    if(!name) return '#6c757d';
+    var cleanName = String(name).trim();
+    var colorMap = {
+      '\u062e\u0645\u0631\u064a': '#722f37',
+      '\u0639\u0646\u0627\u0628\u064a': '#800020',
+      '\u062a\u064a\u062a\u0627\u0646\u064a\u0648\u0645 \u0635\u062d\u0631\u0627\u0648\u064a': '#c2b29f',
+      '\u0635\u062d\u0631\u0627\u0648\u064a': '#c2b29f',
+      '\u062a\u064a\u062a\u0627\u0646\u064a\u0648\u0645 \u0637\u0628\u064a\u0639\u064a': '#878681',
+      '\u062a\u064a\u062a\u0627\u0646\u064a\u0648\u0645': '#878681',
+      '\u062a\u064a\u062a\u0627\u0646\u064a\u0648\u0645 \u0623\u0633\u0648\u062f': '#232426',
+      '\u0623\u0633\u0648\u062f \u0641\u062e\u0645': '#1a1a1a',
+      '\u062a\u064a\u062a\u0627\u0646\u064a\u0648\u0645 \u0623\u0628\u064a\u0636': '#f2f1ed',
+      '\u0646\u064a\u0644\u064a': '#1f3044',
+      '\u0623\u0632\u0631\u0642 \u062f\u0627\u0643\u0646': '#1b263b',
+      '\u0623\u0633\u0648\u062f': '#000000',
+      '\u0623\u0628\u064a\u0636': '#ffffff',
+      '\u0643\u062d\u0644\u064a': '#0d1b2a',
+      '\u0631\u0645\u0627\u062f\u064a': '#4a4a4a',
+      '\u0641\u0636\u064a': '#e0e0e0',
+      '\u0630\u0647\u0628\u064a': '#d4af37',
+      '\u0632\u064a\u062a\u064a': '#3b4d3a',
+      '\u0623\u062e\u0636\u0631 \u063a\u0627\u0645\u0642': '#1b4332',
+      '\u0648\u0631\u062f\u064a': '#ffccd5',
+      '\u0632\u0647\u0631\u064a': '#ffb6c1',
+      '\u0628\u0646\u0641\u0633\u062c\u064a': '#3a0ca3',
+      '\u0627\u0633\u0648\u062f': '#000000',
+      '\u0627\u0628\u064a\u0636': '#ffffff',
+      '\u0627\u062d\u0645\u0631': '#c53030',
+      '\u0623\u062d\u0645\u0631': '#c53030',
+      '\u0627\u062e\u0636\u0631': '#2f855a',
+      '\u0623\u062e\u0636\u0631': '#2f855a',
+      '\u0627\u0632\u0631\u0642': '#2b6cb0',
+      '\u0623\u0632\u0631\u0642': '#2b6cb0',
+      '\u0628\u0631\u062a\u0642\u0627\u0644\u064a': '#dd6b20',
+      '\u0623\u0635\u0641\u0631': '#d69e2e',
+      '\u0627\u0635\u0641\u0631': '#d69e2e'
     };
-    if(map[n]) return map[n];
-    for(var k in map){ if(n.indexOf(k)>=0) return map[k]; }
-    var h=0; for(var i=0;i<n.length;i++) h=n.charCodeAt(i)+((h<<5)-h);
-    var c=(h&0x00ffffff).toString(16).toUpperCase();
-    return '#'+('00000'.substring(0,6-c.length))+c;
+    if(colorMap[cleanName]) return colorMap[cleanName];
+    var keys = Object.keys(colorMap).sort(function(a,b){ return b.length - a.length; });
+    for(var i=0;i<keys.length;i++){
+      if(cleanName.indexOf(keys[i]) >= 0) return colorMap[keys[i]];
+    }
+    return '#6c757d';
+  }
+  function getDynamicColor(colorName){
+    return colorHex(colorName);
   }
   function chipsHtml(colors){
     if(!colors||!colors.length) return '';
     return '<div class="pd-color-chips">'+colors.map(function(c){
-      return '<span class="pd-color-chip"><span class="pd-color-dot" style="background:'+colorHex(c)+'"></span>'+esc(c)+'</span>';
+      return '<span class="pd-color-chip"><span class="pd-color-dot" style="background:'+getDynamicColor(c)+'"></span>'+esc(c)+'</span>';
     }).join('')+'</div>';
   }
 
