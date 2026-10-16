@@ -1,13 +1,13 @@
 (function(){
-  var STYLE_ID = 'colors-display-fix-css-v2';
+  var STYLE_ID = 'colors-display-fix-css-v3';
   if(!document.getElementById(STYLE_ID)){
     var s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent = [
-      '.pd-colors{margin:14px 0 8px;padding:14px;border-radius:14px;background:linear-gradient(145deg,#1a1810,#12100c);border:1px solid rgba(201,162,39,.25);}',
+      '.pd-colors{margin:14px 0 8px;padding:14px;border-radius:14px;background:linear-gradient(145deg,#1a1810,#12100c);border:1px solid rgba(201,162,39,.28);}',
       '.pd-colors h4{margin:0 0 10px;font-size:.85rem;color:#c9a227;font-weight:700;}',
       '.pd-color-chips{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;align-items:center;}',
-      '.pd-color-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#16140f;border:1px solid rgba(201,162,39,.3);color:#f0ebe0;font-size:.82rem;font-weight:600;}',
+      '.pd-color-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#16140f;border:1px solid rgba(201,162,39,.32);color:#f0ebe0;font-size:.82rem;font-weight:600;}',
       '.pd-color-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);flex-shrink:0;}'
     ].join('\n');
     (document.head||document.documentElement).appendChild(s);
@@ -55,20 +55,14 @@
   }
 
   var cloudMap = null;
-  var cloudLoading = false;
-  function loadCloudMap(cb){
+  function loadCloud(cb){
     if(cloudMap){ if(cb) cb(cloudMap); return; }
-    if(cloudLoading){ setTimeout(function(){ loadCloudMap(cb); }, 200); return; }
-    cloudLoading = true;
     var url = 'https://iqwxrgwaladixagtnayx.supabase.co/storage/v1/object/public/shop-images/meta/product-extras.json?t='+Date.now();
     fetch(url).then(function(r){ return r.ok ? r.json() : {}; }).then(function(map){
       cloudMap = map || {};
-      cloudLoading = false;
       try {
         var local = JSON.parse(localStorage.getItem('shop007_product_extras_v1')||'{}')||{};
-        Object.keys(cloudMap).forEach(function(k){
-          local[k] = Object.assign({}, local[k]||{}, cloudMap[k]);
-        });
+        Object.keys(cloudMap).forEach(function(k){ local[k] = Object.assign({}, local[k]||{}, cloudMap[k]); });
         localStorage.setItem('shop007_product_extras_v1', JSON.stringify(local));
       } catch(e){}
       try {
@@ -80,10 +74,10 @@
         }
       } catch(e){}
       if(cb) cb(cloudMap);
-    }).catch(function(){ cloudLoading = false; cloudMap = cloudMap||{}; if(cb) cb(cloudMap); });
+    }).catch(function(){ cloudMap = cloudMap||{}; if(cb) cb(cloudMap); });
   }
 
-  function getColors(id){
+  function getColorsById(id){
     var sid = String(id);
     try {
       if(typeof data !== 'undefined' && data && data.products){
@@ -98,29 +92,41 @@
     } catch(e){}
     try {
       var all = JSON.parse(localStorage.getItem('shop007_product_extras_v1')||'{}')||{};
-      if(all[id] && all[id].colors){ var b=parseColors(all[id].colors); if(b.length) return b; }
-      if(all[sid] && all[sid].colors){ var c=parseColors(all[sid].colors); if(c.length) return c; }
+      if(all[sid] && all[sid].colors){ var b=parseColors(all[sid].colors); if(b.length) return b; }
+      if(all[id] && all[id].colors){ var c=parseColors(all[id].colors); if(c.length) return c; }
     } catch(e){}
     if(cloudMap){
-      var e = cloudMap[id] || cloudMap[sid];
+      var e = cloudMap[sid] || cloudMap[id];
       if(e && e.colors){ var d=parseColors(e.colors); if(d.length) return d; }
     }
     return [];
   }
 
-  function injectColors(id){
-    var body = document.getElementById('productDetailBody');
-    if(!body) return;
-    var cols = getColors(id);
-    var old = body.querySelector('.pd-colors');
-    if(old) old.remove();
-    body.querySelectorAll('.pd-spec-colors').forEach(function(el){ el.remove(); });
-    if(!cols.length) return;
+  function getColorsByName(name){
+    if(!name) return [];
+    var n = String(name).trim().toLowerCase();
+    try {
+      if(typeof data !== 'undefined' && data && data.products){
+        for(var i=0;i<data.products.length;i++){
+          var p = data.products[i];
+          if(String(p.name||'').trim().toLowerCase()===n){
+            var cols = getColorsById(p.id);
+            if(cols.length) return cols;
+            if(cloudMap && cloudMap[p.id]) return parseColors(cloudMap[p.id].colors);
+          }
+        }
+      }
+    } catch(e){}
+    return [];
+  }
 
+  function injectIntoDetail(cols){
+    var body = document.getElementById('productDetailBody');
+    if(!body || !cols || !cols.length) return false;
+    if(body.querySelector('.pd-colors')) return true;
     var box = document.createElement('div');
     box.className = 'pd-colors';
     box.innerHTML = '<h4>\u0627\u0644\u0623\u0644\u0648\u0627\u0646 \u0627\u0644\u0645\u062a\u0648\u0641\u0631\u0629</h4>' + chipsHtml(cols);
-
     var price = body.querySelector('.pd-price');
     var specs = body.querySelector('.pd-specs');
     if(price && price.parentNode){
@@ -131,76 +137,68 @@
     } else {
       body.appendChild(box);
     }
-
-    if(specs){
+    if(specs && !specs.querySelector('.pd-spec-colors')){
       var row = document.createElement('div');
       row.className = 'pd-spec pd-spec-colors';
       row.innerHTML = '<span class="pd-spec-label">\u0627\u0644\u0623\u0644\u0648\u0627\u0646 \u0627\u0644\u0645\u062a\u0648\u0641\u0631\u0629</span><span class="pd-spec-val">'+esc(cols.join('\u060c '))+'</span>';
       specs.appendChild(row);
     }
+    return true;
   }
 
-  function patchGetExtra(){
-    if(typeof window.getExtra === 'function' && !window.getExtra._colorsPatched){
-      var orig = window.getExtra;
-      window.getExtra = function(id){
-        var r = orig.apply(this, arguments) || {};
-        var cols = getColors(id);
-        if(cols.length) r.colors = cols.join('\u060c ');
-        else if(!r.colors) r.colors = '';
-        return r;
-      };
-      window.getExtra._colorsPatched = true;
-    }
-  }
+  function tryInject(){
+    var body = document.getElementById('productDetailBody');
+    var modal = document.getElementById('productDetailModal');
+    if(!body || !modal) return;
+    if(!modal.classList.contains('show') && modal.style.display === 'none') return;
+    if(body.querySelector('.pd-colors')) return;
 
-  function installOpenDetail(){
-    if(typeof window.openProductDetail !== 'function') return;
-    if(window.openProductDetail._v2Colors) return;
-    var orig = window.openProductDetail;
-    window.openProductDetail = function(id){
-      var r = orig.apply(this, arguments);
-      injectColors(id);
-      setTimeout(function(){ injectColors(id); }, 50);
-      setTimeout(function(){ injectColors(id); }, 200);
-      loadCloudMap(function(){ injectColors(id); setTimeout(function(){ injectColors(id); }, 100); });
-      return r;
-    };
-    window.openProductDetail._v2Colors = true;
-  }
-
-  function patchSetExtra(){
-    if(typeof window.setExtra === 'function' && !window.setExtra._colorsPatched){
-      var orig = window.setExtra;
-      window.setExtra = function(id, obj){
-        var r = orig.apply(this, arguments);
-        if(obj && obj.colors != null){
-          try {
-            if(typeof data !== 'undefined' && data && data.products){
-              var p = data.products.find(function(x){ return String(x.id)===String(id); });
-              if(p) p.colors = obj.colors;
+    var titleEl = body.querySelector('.pd-title, h2');
+    var name = titleEl ? titleEl.textContent.trim() : '';
+    var cols = getColorsByName(name);
+    if(!cols.length && name){
+      try {
+        if(typeof data !== 'undefined' && data && data.products){
+          for(var i=0;i<data.products.length;i++){
+            var pn = String(data.products[i].name||'');
+            if(pn && (name.indexOf(pn)>=0 || pn.indexOf(name)>=0)){
+              cols = getColorsById(data.products[i].id);
+              if(cols.length) break;
             }
-          } catch(e){}
+          }
         }
-        return r;
-      };
-      window.setExtra._colorsPatched = true;
+      } catch(e){}
     }
+    if(cols.length) injectIntoDetail(cols);
   }
 
-  function boot(){
-    loadCloudMap();
-    patchGetExtra();
-    patchSetExtra();
-    installOpenDetail();
+  function watchModal(){
+    var modal = document.getElementById('productDetailModal');
+    if(!modal) return;
+    if(modal._colorsObs) return;
+    modal._colorsObs = true;
+    var obs = new MutationObserver(function(){
+      setTimeout(tryInject, 30);
+      setTimeout(tryInject, 150);
+      setTimeout(function(){ loadCloud(function(){ tryInject(); }); }, 50);
+    });
+    obs.observe(modal, { attributes:true, attributeFilter:['class','style'], childList:true, subtree:true });
   }
-  boot();
-  setTimeout(boot, 500);
-  setTimeout(boot, 1500);
-  setTimeout(boot, 3000);
-  setInterval(function(){
-    if(typeof window.openProductDetail==='function' && !window.openProductDetail._v2Colors){
-      installOpenDetail();
-    }
-  }, 2000);
+
+  var bodyObs = new MutationObserver(function(){
+    watchModal();
+    tryInject();
+  });
+  bodyObs.observe(document.documentElement, { childList:true, subtree:true });
+
+  document.addEventListener('click', function(){
+    setTimeout(tryInject, 80);
+    setTimeout(tryInject, 250);
+    setTimeout(function(){ loadCloud(function(){ tryInject(); }); }, 100);
+  }, true);
+
+  loadCloud(function(){});
+  setTimeout(watchModal, 500);
+  setTimeout(watchModal, 1500);
+  setInterval(function(){ watchModal(); tryInject(); }, 2000);
 })();
