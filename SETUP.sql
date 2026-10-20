@@ -1,4 +1,4 @@
--- 007 Phone Shop - Run once in Supabase SQL Editor
+-- 007 Phone Shop - Run once in Supabase SQL Editor (new project)
 CREATE TABLE IF NOT EXISTS shop_settings (
   id INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
   shop_name TEXT DEFAULT '007',
@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS shop_settings (
   whatsapp TEXT DEFAULT '',
   facebook TEXT DEFAULT '',
   instagram TEXT DEFAULT '',
+  website_url TEXT DEFAULT '',
   admin_password TEXT DEFAULT '',
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -29,6 +30,13 @@ CREATE TABLE IF NOT EXISTS products (
   image_url TEXT,
   hidden BOOLEAN DEFAULT FALSE,
   sort_order INT DEFAULT 0,
+  condition TEXT DEFAULT 'new',
+  storage TEXT DEFAULT '',
+  ram TEXT DEFAULT '',
+  battery NUMERIC,
+  cleanliness NUMERIC,
+  description TEXT DEFAULT '',
+  colors TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
