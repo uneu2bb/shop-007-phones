@@ -79,7 +79,8 @@
   var cloudMap = null;
   function loadCloud(cb){
     if(cloudMap){ if(cb) cb(cloudMap); return; }
-    var url = 'https://iqwxrgwaladixagtnayx.supabase.co/storage/v1/object/public/shop-images/meta/product-extras.json?t='+Date.now();
+    var base=(typeof window!=='undefined'&&window.SUPABASE_URL)?window.SUPABASE_URL:'https://hpfdjbrmopvxcvgwyrwm.supabase.co';
+    var url = base+'/storage/v1/object/public/shop-images/meta/product-extras.json?t='+Date.now();
     fetch(url).then(function(r){ return r.ok ? r.json() : {}; }).then(function(map){
       cloudMap = map || {};
       try {
